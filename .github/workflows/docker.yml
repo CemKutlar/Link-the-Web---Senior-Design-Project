@@ -1,4 +1,4 @@
-name: Docker Build and Push to ECRr
+name: Docker Build and Push to ECRrr
 
 on:
   push:
