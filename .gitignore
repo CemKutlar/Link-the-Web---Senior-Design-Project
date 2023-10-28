@@ -1,9 +1,14 @@
+# General
+node_modules/
+*.log
+*.env
+
 # Backend specific
 backend/node_modules/
 backend/package-lock.json
 backend/.env
 
-# Frontend specific
+# Frontend specificss
 frontend/node_modules/
 frontend/package-lock.json
 frontend/.env
