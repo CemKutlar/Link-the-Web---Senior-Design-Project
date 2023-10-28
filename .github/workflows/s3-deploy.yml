@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "frontend/build/**"
+      - "frontend/**"
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -17,7 +17,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "14" # Or whatever version you prefer
+          node-version: "18"
 
       - name: Install dependencies
         run: |
