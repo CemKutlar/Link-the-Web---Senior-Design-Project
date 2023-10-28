@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "Backend/**"
+      - "backend/**"
 
 jobs:
   build-and-push:
@@ -30,7 +30,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           echo $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG Backend/
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG backend/
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Print AWS Region
