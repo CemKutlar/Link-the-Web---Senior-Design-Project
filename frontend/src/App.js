@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
 import { Amplify } from "aws-amplify";
-import { awsExports } from "./aws-exports";
+import awsExports from "./aws-exports";
 import { Authenticator, Divider } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
