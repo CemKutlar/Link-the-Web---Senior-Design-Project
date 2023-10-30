@@ -1,8 +1,12 @@
+import React from "react";
 import "./App.css";
 import { Amplify } from "aws-amplify";
 import { awsExports } from "./aws-exports";
-import { Authenticator } from "@aws-amplify/ui-react";
+import { Authenticator, Divider } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+
+import About from "./About";
 
 Amplify.configure({
   Auth: {
@@ -87,8 +91,30 @@ const formFields = {
 
 export default function App() {
   return (
-    <Authenticator formFields={formFields}>
-      {({ signOut }) => <button onClick={signOut}>Sign out</button>}
-    </Authenticator>
+    <Router>
+      <nav>
+        <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>
+            <Link to="/about">About</Link>
+          </li>
+        </ul>
+      </nav>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <div className="auth-container">
+              <Authenticator formFields={formFields}>
+                {({ signOut }) => <button onClick={signOut}>Sign out</button>}
+              </Authenticator>
+            </div>
+          }
+        />
+        <Route path="/about" element={<About />} />
+      </Routes>
+    </Router>
   );
 }
