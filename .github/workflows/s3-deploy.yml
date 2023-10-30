@@ -30,6 +30,15 @@ jobs:
       - name: Install dependencies
         run: cd frontend && npm install
 
+      - name: Install Amplify CLI
+        run: npm install -g @aws-amplify/cli
+
+      - name: Configure Amplify
+        run: amplify configure --accessKeyId ${{ secrets.AWS_ACCESS_KEY_ID }} --secretAccessKey ${{ secrets.AWS_SECRET_ACCESS_KEY }} --region ${{ secrets.AWS_REGION }} --yes
+
+      - name: Push Amplify Changes
+        run: cd frontend && amplify push --yes
+
       - name: Build React App
         run: cd frontend && npm run build
 
