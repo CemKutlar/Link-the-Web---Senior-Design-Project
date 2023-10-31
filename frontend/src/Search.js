@@ -1,20 +1,24 @@
 import React from "react";
-import "./About.css";
+import "./Search.css";
 
 function SearchPage() {
   return (
-    <div className="about-page">
+    <div className="search-page">
       <div className="search-bar">
-        {/* Create your search bar here */}
         <input type="text" placeholder="Search..." />
         <button>Search</button>
       </div>
       <div className="content-section">
-        {/* Add your content here */}
-        <p>*TODO*</p>
+        <button className="create-link-button">Create Link</button>
+        <ul className="related-topics">
+          <li>Related Topic 1</li>
+          <li>Related Topic 2</li>
+          <li>Related Topic 3</li>
+        </ul>
       </div>
     </div>
   );
 }
+
 
 export default SearchPage;
