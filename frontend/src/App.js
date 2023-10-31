@@ -1,4 +1,5 @@
 import React from "react";
+import { SearchField } from "@aws-amplify/ui-react";
 import "./App.css";
 import { Amplify } from "aws-amplify";
 import awsExports from "./aws-exports";
@@ -102,6 +103,17 @@ export default function App() {
           </li>
         </ul>
       </nav>
+
+          {/* Add the SearchField component with custom styles */}
+      <div className="small-search-container">
+        <SearchField
+          label="Search"
+          placeholder="Search here..."
+          labelHidden={false}
+          className="small-search-field" // Apply custom styles to the search field
+        />
+      </div>
+      
       <Routes>
         <Route
           path="/"
