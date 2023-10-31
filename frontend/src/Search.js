@@ -1,5 +1,7 @@
+// SearchPage.js
+
 import React from "react";
-import "./Search.css";
+import "./Search.css"
 
 function SearchPage() {
   return (
@@ -9,7 +11,10 @@ function SearchPage() {
         <button>Search</button>
       </div>
       <div className="content-section">
-        <button className="create-link-button">Create Link</button>
+      <button className="create-link-button">Create New Link</button>
+        <p className="no-link-message">
+          There is no link page for the searched link. Links that can be related to your search:
+        </p>
         <ul className="related-topics">
           <li>Related Topic 1</li>
           <li>Related Topic 2</li>
@@ -19,6 +24,5 @@ function SearchPage() {
     </div>
   );
 }
-
 
 export default SearchPage;
