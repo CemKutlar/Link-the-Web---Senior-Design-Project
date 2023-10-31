@@ -1,5 +1,5 @@
 import React from "react";
-import "./App.css";
+import "./styles/App.css";
 import { Amplify } from "aws-amplify";
 import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
@@ -7,6 +7,7 @@ import "@aws-amplify/ui-react/styles.css";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 
 import About from "./About";
+import LinkPage from "./LinkPage";
 
 Amplify.configure({
   Auth: {
@@ -100,6 +101,9 @@ export default function App() {
           <li>
             <Link to="/about">About!</Link>
           </li>
+          <li>
+            <Link to="/linkpage">LinkPage</Link>
+          </li>
         </ul>
       </nav>
       <Routes>
@@ -114,6 +118,7 @@ export default function App() {
           }
         />
         <Route path="/about" element={<About />} />
+        <Route path="/linkpage" element={<LinkPage />} />
       </Routes>
     </Router>
   );
