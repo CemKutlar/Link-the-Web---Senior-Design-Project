@@ -1,14 +1,20 @@
-// src/About.js
-
 import React from "react";
+import "./About.css";
 
-const About = () => {
+function SearchPage() {
   return (
-    <div>
-      <h1>About Us</h1>
-      <p>This is the about page.</p>
+    <div className="about-page">
+      <div className="search-bar">
+        {/* Create your search bar here */}
+        <input type="text" placeholder="Search..." />
+        <button>Search</button>
+      </div>
+      <div className="content-section">
+        {/* Add your content here */}
+        <p>*TODO*</p>
+      </div>
     </div>
   );
-};
+}
 
-export default About;
+export default SearchPage;
