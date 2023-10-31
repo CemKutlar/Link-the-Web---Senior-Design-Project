@@ -1,10 +1,12 @@
 import React from "react";
 import "./styles/App.css";
 import { Amplify } from "aws-amplify";
+import { Auth } from "@aws-amplify/auth";
 import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import About from "./About";
 import LinkPage from "./LinkPage";
@@ -91,6 +93,21 @@ const formFields = {
 };
 
 export default function App() {
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    checkAuthState();
+  }, []);
+
+  const checkAuthState = async () => {
+    try {
+      await Auth.currentAuthenticatedUser();
+      setSignedIn(true);
+    } catch (error) {
+      setSignedIn(false);
+    }
+  };
+
   return (
     <Router>
       <nav>
