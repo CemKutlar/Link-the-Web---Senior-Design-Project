@@ -38,8 +38,6 @@
 }
 
 .auth-container {
-  /* Use margin, padding, or other CSS properties to reposition */
-  margin-top: 100px; /* Example: Move it 50 pixels down */
-  margin-left: 50px; /* Example: Move it 50 pixels to the right */
-  /* Add other styles as needed */
+  margin-top: 100px; 
+  margin-left: 50px;
 }
