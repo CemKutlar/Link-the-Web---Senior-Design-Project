@@ -43,3 +43,8 @@
   margin-left: 50px; /* Example: Move it 50 pixels to the right */
   /* Add other styles as needed */
 }
+
+.small-search-container {
+  display: flex;
+  justify-content: center; /* Horizontal centering */
+}
