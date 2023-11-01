@@ -11,7 +11,6 @@ import SearchPage from "./Search";
 import { useEffect, useState } from "react";
 import LinkPage from "./LinkPage";
 
-
 Amplify.configure({
   Auth: {
     region: awsExports.REGION,
@@ -114,7 +113,7 @@ export default function App() {
       <nav>
         <ul>
           <li>
-            <Link to="/">Home!</Link>
+            <Link to="/">Home!!!!</Link>
           </li>
           <li>
             <Link to="/search">About!</Link>
@@ -125,7 +124,7 @@ export default function App() {
         </ul>
       </nav>
 
-          {/* Add the SearchField component with custom styles */}
+      {/* Add the SearchField component with custom styles */}
       <div className="small-search-container">
         <SearchField
           label="Search"
@@ -134,7 +133,7 @@ export default function App() {
           className="small-search-field" // Apply custom styles to the search field
         />
       </div>
-      
+
       <Routes>
         <Route
           path="/"
