@@ -110,6 +110,7 @@ export default function App() {
 
   return (
     <Router>
+      <p>sernior design project</p>
       <nav>
         <ul>
           <li>
