@@ -6,10 +6,12 @@ import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import SearchPage from "./Search";
 import { useEffect, useState } from "react";
 
 import About from "./About";
 import LinkPage from "./LinkPage";
+
 
 Amplify.configure({
   Auth: {
@@ -116,7 +118,7 @@ export default function App() {
             <Link to="/">Home!</Link>
           </li>
           <li>
-            <Link to="/about">About!</Link>
+            <Link to="/search">About!</Link>
           </li>
           <li>
             <Link to="/linkpage">LinkPage</Link>
@@ -136,6 +138,7 @@ export default function App() {
         />
         <Route path="/about" element={<About />} />
         <Route path="/linkpage" element={<LinkPage />} />
+        <Route path="/search" element={<SearchPage />} />
       </Routes>
     </Router>
   );
