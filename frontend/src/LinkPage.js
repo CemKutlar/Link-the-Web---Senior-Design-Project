@@ -7,12 +7,6 @@ import "@aws-amplify/ui-react/styles.css";
 const LinkPage = () => {
   return (
     <div className={styles.container}>
-      <SearchField
-        className={styles.searchField}
-        label="Search"
-        placeholder="Search here..."
-        labelHidden={false}
-      />
       <div className="comment-section">
         <h2>Comments</h2>
         <div className="new-comment">
