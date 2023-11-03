@@ -1,7 +1,7 @@
 // SearchPage.js
 
 import React from "react";
-import "./Search.css";
+import "./styles/Search.css";
 
 function SearchPage() {
   return (

@@ -111,19 +111,20 @@ export default function App() {
   return (
     <Router>
       <p>Link The Web</p>
-      <nav>
-        <ul>
-          <li>
-            <Link to="/">Home!!!</Link>
-          </li>
-          <li>
-            <Link to="/search">About!</Link>
-          </li>
-          <li>
-            <Link to="/linkpage">LinkPage</Link>
-          </li>
-        </ul>
-      </nav>
+        <nav>
+          <ul>
+            <li>
+              <Link to="/">Home!!!</Link>
+            </li>
+            <li>
+              <Link to="/search">About!</Link>
+            </li>
+            <li>
+              <Link to="/linkpage">LinkPage</Link>
+            </li>
+          </ul>
+        </nav>
+
 
       {/* Add the SearchField component with custom styles */}
       <div className="small-search-container">
