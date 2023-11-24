@@ -13,7 +13,6 @@ body {
   text-align: center;
 }
 
-/* Style the logo */
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -51,26 +50,32 @@ body {
   }
 }
 
-/* Center the Auth container */
 .auth-container {
-  margin-top: 100px;
-  margin-left: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
 }
 
 /* Style the small search container */
-.small-search-container {
+.search-container {
   display: flex;
-  justify-content: center;
-  background-color: #f2f2f2; /* Set the background color */
+  flex-direction: column;
+  background-color: #f2f2f2;
   padding: 10px;
+  width: 400px;
+  margin: 20px auto; /* Set top and bottom margin to 20px and auto for left and right */
+  align-items: center; /* Center the content horizontally */
+  justify-content: center; /* Center the content vertically */
+  text-align: center; /* Center the text within the container */
 }
 
-/* Style the small search field */
-.small-search-field {
-  width: 100%;
-  max-width: 400px; /* Limit the width of the search field */
-  background-color: #fff; /* White background */
-  color: #333; /* Text color */
+
+/* Additional styling for the search container */
+.search-field {
+  max-width: 300px;
+  background-color: #fff;
+  color: #333;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -78,15 +83,82 @@ body {
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.small-search-field::placeholder {
-  color: #ccc; /* Placeholder text color */
+.search-field::placeholder {
+  color: #ccc;
 }
 
-.small-search-field:focus {
-  border-color: #61dafb; /* Highlight border color on focus */
-  box-shadow: 0 0 5px rgba(97, 218, 251, 0.5); /* Add a subtle box shadow on focus */
+.search-field:focus {
+  border-color: #61dafb;
+  box-shadow: 0 0 5px rgba(97, 218, 251, 0.5);
 }
 
-.small-search-field:focus::placeholder {
-  color: #999; /* Adjust placeholder text color on focus */
+.search-field:focus::placeholder {
+  color: #999;
+}
+
+/* Style the navigation tab on the left */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 20px; 
+  background-color: #282c34;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: width 0.3s, opacity 0.3s, visibility 0s 0.3s; 
+  overflow: hidden; 
+  opacity: .01; 
+  visibility: visible; 
+}
+
+.nav:hover {
+  width: 200px; /* Set the width for the expanded state on hover */
+  opacity: 1; /* Make the texts fully visible */
+}
+
+/* Rest of your navigation styles remain the same */
+.nav ul {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+.nav ul li {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.nav a {
+  text-decoration: none;
+  color: white;
+  display: block;
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav a:hover {
+  background-color: #61dafb;
+  color: #282c34;
+}
+
+
+.how-to-use-section {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.how-to-use-section h2 {
+  color: #282c34;
+}
+
+.how-to-use-section p {
+  color: #333;
 }
