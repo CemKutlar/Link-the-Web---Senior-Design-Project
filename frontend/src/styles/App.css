@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  
 }
 
 .App-logo {
@@ -40,9 +41,11 @@
 .auth-container {
   margin-top: 100px; 
   margin-left: 50px;
+  
 }
 
 .small-search-container {
   display: flex;
   justify-content: center; /* Horizontal centering */
 }
+
