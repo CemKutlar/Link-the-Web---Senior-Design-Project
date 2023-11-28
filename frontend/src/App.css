@@ -14,24 +14,8 @@ body {
 .App-logo {
   height: 40vmin;
   pointer-events: none;
-
-    
-          
-            
-    
-
-          
-          Expand Down
-          
-            
-    
-
-          
-          Expand Up
-    
-    @@ -51,42 +50,115 @@ body {
-  
 }
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
