@@ -2,8 +2,8 @@
   display: flex;
   justify-content: center; /* Center the search bar horizontally */
   padding: 2rem; /* Add padding at the top, left, and right */
-
-  /* If you wish to adjust the padding based on the device width, you can use media queries. For example: */
+ 
+  
   @media (max-width: 768px) { /* Tablets and mobile devices */
     padding: 1rem;
   }

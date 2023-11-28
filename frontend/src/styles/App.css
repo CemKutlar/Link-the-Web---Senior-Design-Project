@@ -1,5 +1,18 @@
+/* App.css */
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f2f2f2;
+  /* Set a background color */
+}
+
 .App {
   text-align: center;
+
 }
 
 .App-logo {
@@ -13,6 +26,7 @@
   }
 }
 
+/* Style the header */
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -24,6 +38,7 @@
   color: white;
 }
 
+/* Style the App-link */
 .App-link {
   color: #61dafb;
 }
@@ -32,17 +47,95 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
 .auth-container {
-  margin-top: 100px; 
+  margin-top: 100px;
   margin-left: 50px;
 }
 
-.small-search-container {
+.search-field::placeholder {
+  color: #ccc;
+}
+
+.search-field:focus {
+  border-color: #61dafb;
+  box-shadow: 0 0 5px rgba(97, 218, 251, 0.5);
+}
+
+.search-field:focus::placeholder {
+  color: #999;
+}
+
+/* Style the navigation tab on the left */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 20px;
+  background-color: #282c34;
+  color: white;
+  padding: 20px;
   display: flex;
-  justify-content: center; /* Horizontal centering */
+  flex-direction: column;
+  align-items: flex-start;
+  transition: width 0.3s, opacity 0.3s, visibility 0s 0.3s;
+  overflow: hidden;
+  opacity: .01;
+  visibility: visible;
+}
+
+.nav:hover {
+  width: 200px;
+  /* Set the width for the expanded state on hover */
+  opacity: 1;
+  /* Make the texts fully visible */
+}
+
+/* Rest of your navigation styles remain the same */
+.nav ul {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+.nav ul li {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.nav a {
+  text-decoration: none;
+  color: white;
+  display: block;
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav a:hover {
+  background-color: #61dafb;
+  color: #282c34;
+}
+
+
+.how-to-use-section {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.how-to-use-section h2 {
+  color: #282c34;
+}
+
+.how-to-use-section p {
+  color: #333;
 }
