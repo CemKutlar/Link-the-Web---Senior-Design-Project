@@ -13,5 +13,3 @@ app.listen(8080, () => {
   console.log("Server running on port 8080");
 });
 
-//deneme commenti
-//Deneme commenti2 - cemmm

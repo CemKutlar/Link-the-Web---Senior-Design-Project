@@ -6,12 +6,13 @@ body {
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f2f2f2; /* Set a background color */
+  background-color: #f2f2f2;
+  /* Set a background color */
 }
 
 .App {
   text-align: center;
-  
+
 }
 
 .App-logo {
@@ -46,15 +47,15 @@ body {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
 .auth-container {
-  margin-top: 100px; 
+  margin-top: 100px;
   margin-left: 50px;
-  
 }
 
 .search-field::placeholder {
@@ -76,22 +77,24 @@ body {
   top: 0;
   left: 0;
   height: 100vh;
-  width: 20px; 
+  width: 20px;
   background-color: #282c34;
   color: white;
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  transition: width 0.3s, opacity 0.3s, visibility 0s 0.3s; 
-  overflow: hidden; 
-  opacity: .01; 
-  visibility: visible; 
+  transition: width 0.3s, opacity 0.3s, visibility 0s 0.3s;
+  overflow: hidden;
+  opacity: .01;
+  visibility: visible;
 }
 
 .nav:hover {
-  width: 200px; /* Set the width for the expanded state on hover */
-  opacity: 1; /* Make the texts fully visible */
+  width: 200px;
+  /* Set the width for the expanded state on hover */
+  opacity: 1;
+  /* Make the texts fully visible */
 }
 
 /* Rest of your navigation styles remain the same */
@@ -136,4 +139,3 @@ body {
 .how-to-use-section p {
   color: #333;
 }
-
