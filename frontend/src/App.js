@@ -1,28 +1,12 @@
 import React from "react";
 import { SearchField } from "@aws-amplify/ui-react";
 import "./styles/App.css";
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 import "./styles/style.scss";
->>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
-=======
-import "./styles/style.scss";
->>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
 import { Amplify } from "aws-amplify";
 import { Auth } from "@aws-amplify/auth";
 import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-<<<<<<< HEAD
-<<<<<<< HEAD
-import { BrowserRouter as Router, Route, Routes, Link, useLocation} from "react-router-dom";
-import SearchPage from "./Search";
-import { useEffect, useState } from "react";
-import LinkPage from "./LinkPage";
-=======
-=======
->>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
 import {
   BrowserRouter as Router,
   Route,
@@ -34,10 +18,6 @@ import SearchPage from "./Search";
 import { useEffect, useState } from "react";
 import LinkPage from "./LinkPage";
 
-<<<<<<< HEAD
->>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
-=======
->>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
 Amplify.configure({
   Auth: {
     region: awsExports.REGION,
@@ -45,14 +25,7 @@ Amplify.configure({
     userPoolWebClientId: awsExports.USER_POOL_CLIENT_ID,
   },
 });
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 
->>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
-=======
-
->>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
 const formFields = {
   signIn: {
     username: {
@@ -133,14 +106,7 @@ export default function App() {
   useEffect(() => {
     checkAuthState();
   }, []);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 
->>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
-=======
-
->>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
   const checkAuthState = async () => {
     try {
       await Auth.currentAuthenticatedUser();
@@ -179,61 +145,6 @@ export default function App() {
     //     <div className="interactive"></div>
     //   </div>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  <div className="app-container">
-    <div className="search-container">
-          <SearchField
-            label="Search"
-            placeholder="Search here..."
-            labelHidden={false}
-            className="search-field"
-          />
-      </div>
-    <div className="nav">
-      <nav>
-        <ul>
-          <li>
-            <Link to="/">Link The Web</Link>
-          </li>
-          <li>
-            <Link to="/search">No-Link-Found Page</Link>
-          </li>
-          <li>
-            <Link to="/linkpage">Link Page</Link>
-          </li>
-        </ul>
-      </nav>
-    </div>
-    <Routes>
-          <Route
-            path="/"
-            element={
-              <div className="auth-container">
-                <Authenticator formFields={formFields}>
-                  {({ signOut }) => <button onClick={signOut}>Sign out</button>}
-                </Authenticator>
-              </div>
-            }
-          />
-          <Route path="/linkpage" element={<LinkPage />} />
-          <Route path="/search" element={<SearchPage />} />
-        </Routes>
-
-    {location.pathname === "/" && (
-        <div className="how-to-use-section">
-          <h2>How to Use</h2>
-          <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas convallis ac enim vel venenatis. Vestibulum non nisl in arcu ultrices congue sit amet vel turpis. Proin congue consequat malesuada. Sed accumsan iaculis nisi luctus elementum. Ut aliquet tortor ut convallis mollis. Vivamus volutpat, lacus non placerat elementum, enim enim lobortis nibh, a molestie lectus erat at urna. Pellentesque tempor pharetra quam, vel varius augue efficitur ac. Aenean pulvinar pellentesque neque, ut viverra ante lacinia et. Cras commodo erat vel tempor ullamcorper. Cras eget feugiat tortor, quis condimentum odio. Aenean pretium magna erat, non mattis odio vulputate at. Aliquam pretium gravida interdum.
-          </p>
-        </div>
-    )}
-      </div>
-  );
-}
-=======
-=======
->>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
     <div className="app-container">
       <div className="search-container">
         <SearchField
@@ -294,7 +205,3 @@ export default function App() {
     </div>
   );
 }
-<<<<<<< HEAD
->>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
-=======
->>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
