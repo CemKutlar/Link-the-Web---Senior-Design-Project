@@ -1,19 +1,16 @@
 /* SearchPage.css */
 
-/* Match the general styles from App.css */
 .search-page {
   text-align: center;
-  /* Add other common styles as needed */
+  background-color: #f2f2f2;
 }
 
-/* Style the search bar similarly to App.css */
 .search-bar {
   background-color: #282c34;
   color: white;
   padding: 20px;
 }
 
-/* Style the search input and button within the search bar */
 .search-bar input {
   padding: 10px;
   border: 1px solid #61dafb;
@@ -32,7 +29,6 @@
   cursor: pointer;
 }
 
-/* Style the content section as a rectangular box */
 .content-section {
   margin-top: 20px;
   padding: 20px;
@@ -42,14 +38,12 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Style the message */
 .no-link-message {
   font-weight: bold;
   margin-bottom: 10px;
-  color: #333; /* Adjust the text color as needed */
+  color: #333;
 }
 
-/* Style the "Create Link" button */
 .create-link-button {
   background-color: #61dafb;
   color: white;
@@ -57,10 +51,13 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  margin-bottom: 20px; /* Add some space below the button */
+  margin-bottom: 20px;
 }
 
-/* Style the "Related topics" list */
+.create-link-button:hover{
+  background-color: #4fa3d7;
+}
+
 .related-topics {
   list-style: none;
   padding: 0;

@@ -7,7 +7,13 @@ import { Auth } from "@aws-amplify/auth";
 import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Link,
+  useLocation,
+} from "react-router-dom";
 import SearchPage from "./Search";
 import { useEffect, useState } from "react";
 import LinkPage from "./LinkPage";
@@ -95,6 +101,7 @@ const formFields = {
 
 export default function App() {
   const [signedIn, setSignedIn] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     checkAuthState();
@@ -142,13 +149,13 @@ export default function App() {
       <nav>
         <ul>
           <li>
-            <Link to="/">Home!!!</Link>
+            <Link to="/">Link The Web</Link>
           </li>
           <li>
-            <Link to="/search">About!</Link>
+            <Link to="/search">No-Link-Found Page</Link>
           </li>
           <li>
-            <Link to="/linkpage">LinkPage</Link>
+            <Link to="/linkpage">Link Page</Link>
           </li>
         </ul>
       </nav>
@@ -163,7 +170,6 @@ export default function App() {
         />
       </div>
 
-      <script type="module" src="bg.ts"></script>
       <Routes>
         <Route
           path="/"
@@ -179,6 +185,5 @@ export default function App() {
         <Route path="/search" element={<SearchPage />} />
       </Routes>
     </Router>
-    // </div>
   );
 }
