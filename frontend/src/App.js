@@ -2,6 +2,10 @@ import React from "react";
 import { SearchField } from "@aws-amplify/ui-react";
 import "./styles/App.css";
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+import "./styles/style.scss";
+>>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
 =======
 import "./styles/style.scss";
 >>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
@@ -11,11 +15,14 @@ import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { BrowserRouter as Router, Route, Routes, Link, useLocation} from "react-router-dom";
 import SearchPage from "./Search";
 import { useEffect, useState } from "react";
 import LinkPage from "./LinkPage";
 =======
+=======
+>>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
 import {
   BrowserRouter as Router,
   Route,
@@ -27,6 +34,9 @@ import SearchPage from "./Search";
 import { useEffect, useState } from "react";
 import LinkPage from "./LinkPage";
 
+<<<<<<< HEAD
+>>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
+=======
 >>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
 Amplify.configure({
   Auth: {
@@ -36,6 +46,10 @@ Amplify.configure({
   },
 });
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
 =======
 
 >>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
@@ -120,6 +134,10 @@ export default function App() {
     checkAuthState();
   }, []);
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
 =======
 
 >>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
@@ -161,6 +179,7 @@ export default function App() {
     //     <div className="interactive"></div>
     //   </div>
 
+<<<<<<< HEAD
 <<<<<<< HEAD
   <div className="app-container">
     <div className="search-container">
@@ -213,6 +232,8 @@ export default function App() {
   );
 }
 =======
+=======
+>>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
     <div className="app-container">
       <div className="search-container">
         <SearchField
@@ -273,4 +294,7 @@ export default function App() {
     </div>
   );
 }
+<<<<<<< HEAD
+>>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
+=======
 >>>>>>> 0b7db8166a74f8f861d83efd6fe6b0dd19a6f843
