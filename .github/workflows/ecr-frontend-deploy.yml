@@ -19,7 +19,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-v2-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-v3-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
@@ -38,34 +38,37 @@ jobs:
       - name: Install dependencies
         run: cd frontend && npm install
 
-      # - name: Install Amplify CLI
-      #   run: npm install -g @aws-amplify/cli
+      - name: Install Amplify CLI
+        run: npm install -g @aws-amplify/cli
 
-      # - name: Check Amplify Configuration
-      #   id: check-config
-      #   run: |
-      #     if [ -d "amplify" ]; then
-      #       echo "::set-output name=isConfigured::true"
-      #     else
-      #       echo "::set-output name=isConfigured::false"
-      #     fi
-      #   working-directory: ./frontend
+      - name: Check Amplify Configuration
+        id: check-config
+        run: |
+          if [ -d "amplify" ]; then
+            echo "::set-output name=isConfigured::true"
+          else
+            echo "::set-output name=isConfigured::false"
+          fi
+        working-directory: ./frontend
 
-      # - name: Configure Amplify
-      #   if: steps.check-config.outputs.isConfigured == 'false'
-      #   run: amplify configure --accessKeyId ${{ secrets.AWS_ACCESS_KEY_ID }} --secretAccessKey ${{ secrets.AWS_SECRET_ACCESS_KEY }} --region ${{ secrets.AWS_REGION }} --yes
+      - name: Configure Amplify
+        if: steps.check-config.outputs.isConfigured == 'false'
+        run: amplify configure --accessKeyId ${{ secrets.AWS_ACCESS_KEY_ID }} --secretAccessKey ${{ secrets.AWS_SECRET_ACCESS_KEY }} --region ${{ secrets.AWS_REGION }} --yes
 
-      # - name: Initialize Amplify
-      #   run: cd frontend && amplify init --yes
+      - name: Initialize Amplify
+        run: cd frontend && amplify init --yes
 
-      # - name: Pull Amplify Changes
-      #   run: cd frontend && amplify pull --yes
+      - name: Pull Amplify Changes
+        run: cd frontend && amplify pull --yes
 
-      # - name: Push Amplify Changes
-      #   run: cd frontend && amplify push --yes
+      - name: Push Amplify Changes
+        run: cd frontend && amplify push --yes
 
       - name: Build React App
         run: cd frontend && npm run build
+
+      - name: Rebuild SASS package
+        run: npm rebuild node-sass
 
       # Build Docker image
       - name: Build Docker image
