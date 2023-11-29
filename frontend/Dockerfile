@@ -1,5 +1,5 @@
 # Stage 1: Build the React application
-FROM --platform=linux/amd64 node:18-alpine AS build
+FROM --platform=linux/amd64 node:19-alpine AS build
 
 WORKDIR /app
 
