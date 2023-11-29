@@ -8,11 +8,13 @@ import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import {
-  BrowserRouter as Route,
+  BrowserRouter as Router, // Corrected this line
   Routes,
+  Route, // Make sure to import Route
   Link,
   useLocation,
 } from "react-router-dom";
+
 import SearchPage from "./Search";
 import { useEffect, useState } from "react";
 import LinkPage from "./LinkPage";
@@ -97,6 +99,7 @@ const formFields = {
     },
   },
 };
+console.log(Router);
 
 export default function App() {
   const [signedIn, setSignedIn] = useState(false);
@@ -121,7 +124,7 @@ export default function App() {
     // <div className="gradient-bg">
     //   <svg xmlns="http://www.w3.org/2000/svg">
     //     <defs>
-    //       <filter id="dsagoojjk">
+    //       <filter id="dsagdssdsoojjk">
     //         <feGaussianBlur
     //           in="SourceGraphic"
     //           stdDeviation="10"
