@@ -8,12 +8,13 @@ import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import {
-  BrowserRouter as Router,
-  Route,
+  BrowserRouter as Router, // Corrected this line
   Routes,
+  Route, // Make sure to import Route
   Link,
   useLocation,
 } from "react-router-dom";
+
 import SearchPage from "./Search";
 import { useEffect, useState } from "react";
 import LinkPage from "./LinkPage";
@@ -98,11 +99,14 @@ const formFields = {
     },
   },
 };
+console.log(Router);
 
 export default function App() {
   const [signedIn, setSignedIn] = useState(false);
   const location = useLocation();
-
+  if (signedIn) {
+    console.log("User SignedIn true!");
+  }
   useEffect(() => {
     checkAuthState();
   }, []);
@@ -120,7 +124,7 @@ export default function App() {
     // <div className="gradient-bg">
     //   <svg xmlns="http://www.w3.org/2000/svg">
     //     <defs>
-    //       <filter id="goo">
+    //       <filter id="dsagdssdsohgkömsdadfadsdsffsfdsfsfsdafdsjjk">
     //         <feGaussianBlur
     //           in="SourceGraphic"
     //           stdDeviation="10"
@@ -142,7 +146,7 @@ export default function App() {
     //     <div className="g3"></div>
     //     <div className="g4"></div>
     //     <div className="g5"></div>
-    //     <div className="interactive"></div>
+    //     <div className="interactiveeeee"></div>
     //   </div>
 
     <div className="app-container">
