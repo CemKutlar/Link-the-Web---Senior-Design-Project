@@ -121,7 +121,7 @@ export default function App() {
     // <div className="gradient-bg">
     //   <svg xmlns="http://www.w3.org/2000/svg">
     //     <defs>
-    //       <filter id="goo">
+    //       <filter id="dsagoojjk">
     //         <feGaussianBlur
     //           in="SourceGraphic"
     //           stdDeviation="10"
