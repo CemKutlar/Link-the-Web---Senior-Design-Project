@@ -19,7 +19,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-v3-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-v4-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
@@ -72,7 +72,7 @@ jobs:
 
       # Build Docker image
       - name: Build Docker image
-        run: docker build -t my-react-app:latest ./frontend
+        run: docker build -t frontend-repo:latest ./frontend
 
       # Authenticate with ECR
       - name: Login to Amazon ECR
