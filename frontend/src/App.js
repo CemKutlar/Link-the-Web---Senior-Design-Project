@@ -8,8 +8,7 @@ import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import {
-  BrowserRouter as Router,
-  Route,
+  BrowserRouter as Route,
   Routes,
   Link,
   useLocation,
@@ -102,7 +101,9 @@ const formFields = {
 export default function App() {
   const [signedIn, setSignedIn] = useState(false);
   const location = useLocation();
-
+  if (signedIn) {
+    console.log("User SignedIn true!");
+  }
   useEffect(() => {
     checkAuthState();
   }, []);

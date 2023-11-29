@@ -1,5 +1,5 @@
 import * as React from "react";
-import { SearchField } from "@aws-amplify/ui-react";
+//import { SearchField } from "@aws-amplify/ui-react";
 import styles from "./styles/LinkPage.css";
 import { useState } from "react";
 import "@aws-amplify/ui-react/styles.css";
