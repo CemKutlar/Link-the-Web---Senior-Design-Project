@@ -12,4 +12,5 @@
 .searchField {
   width: 100%; /* Ensure it takes up full width of the container */
   max-width: 800px; /* Or whatever maximum width you want */
+  
 }

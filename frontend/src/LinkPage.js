@@ -3,10 +3,16 @@ import * as React from "react";
 import styles from "./styles/LinkPage.css";
 import { useState } from "react";
 import "@aws-amplify/ui-react/styles.css";
-
+import { LinkList } from "./components/LinkList";
+import { useParams } from "react-router-dom";
 const LinkPage = () => {
+  const { linkName } = useParams();
   return (
     <div className={styles.container}>
+      <h1>Link Details</h1>
+      <p>Link Name: {decodeURIComponent(linkName)}</p>
+      {/* Additional details and functionality for the link */}
+      <LinkList />
       <div className="comment-section">
         <h2>Comments</h2>
         <div className="new-comment">

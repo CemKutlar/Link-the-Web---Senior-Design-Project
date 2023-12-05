@@ -1,5 +1,5 @@
 import React from "react";
-import { SearchField } from "@aws-amplify/ui-react";
+// import { SearchField } from "@aws-amplify/ui-react";
 import "./styles/App.css";
 import "./styles/style.scss";
 import { Amplify } from "aws-amplify";
@@ -8,17 +8,18 @@ import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import {
-  BrowserRouter as Router, // Corrected this line
+  BrowserRouter as Router,
   Routes,
-  Route, // Make sure to import Route
+  Route,
   Link,
   useLocation,
 } from "react-router-dom";
-
+import { Linkk } from "./components/Link";
 import SearchPage from "./Search";
 import { useEffect, useState } from "react";
 import LinkPage from "./LinkPage";
-
+import SearchComponent from "./components/SearchBar";
+import { LinkProvider } from "./contexts/LinkContext";
 Amplify.configure({
   Auth: {
     region: awsExports.REGION,
@@ -150,14 +151,7 @@ export default function App() {
     //   </div>
 
     <div className="app-container">
-      <div className="search-container">
-        <SearchField
-          label="Search"
-          placeholder="Search here..."
-          labelHidden={false}
-          className="search-field"
-        />
-      </div>
+      <SearchComponent />
       <div className="nav">
         <nav>
           <ul>
@@ -184,7 +178,16 @@ export default function App() {
             </div>
           }
         />
+        <Route path="/link/:linkName" element={<LinkPage />} />
         <Route path="/linkpage" element={<LinkPage />} />
+        <Route
+          path="/links/:id"
+          element={
+            <LinkProvider>
+              <Linkk />
+            </LinkProvider>
+          }
+        />
         <Route path="/search" element={<SearchPage />} />
       </Routes>
 
