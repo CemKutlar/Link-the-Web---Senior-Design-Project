@@ -70,42 +70,44 @@ app.get("/check-link", async (req, res) => {
 
 app.get("/links/:id", async (request, reply) => {
   const linkId = request.params.id;
-  // const userId = request.cookies.userId; // Adjust according to your cookie setup
 
   const client = await pool.connect();
   try {
     const query = `
-      WITH link_details AS (
-          SELECT l.id, l.name, l.description, l.created_at, l.creator_user_id
-          FROM public.links l
-          WHERE l.id = $1
-      ),
-      comments_details AS (
-          SELECT c.id, c.message, c.created_at, c.updated_at, c.user_id, c.link_id, c.parent_id, COUNT(l.user_id) AS like_count
-          FROM public.comments c
-          LEFT JOIN public.likes l ON c.id = l.comment_id
-          WHERE c.link_id = $1
-          GROUP BY c.id
-          ORDER BY c.created_at DESC
-      ),
-      user_likes AS (
-          SELECT comment_id
-          FROM public.likes
-          WHERE user_id = $2
-          AND comment_id IN (SELECT id FROM comments_details)
-      )
-      SELECT ld.*, cd.*, ul.comment_id IS NOT NULL AS liked_by_me
-      FROM link_details ld
-      CROSS JOIN comments_details cd
-      LEFT JOIN user_likes ul ON cd.id = ul.comment_id;
+      SELECT
+        links.id,
+        links.name,
+        links.description,
+        links.created_at,
+        links.creator_user_id,
+        COALESCE(
+          JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'id', comments.id,
+              'message', comments.message,
+              'parentId', comments.parent_id,
+              'createdAt', comments.created_at,
+              'user', JSON_BUILD_OBJECT(
+                'id', users.id,
+                'name', users.name
+              )
+            ) ORDER BY comments.created_at DESC
+          ) FILTER (WHERE comments.id IS NOT NULL),
+          '[]'
+        ) AS comments
+      FROM public.links
+      LEFT JOIN public.comments ON links.id = comments.link_id
+      LEFT JOIN public.users ON comments.user_id = users.id
+      WHERE links.id = $1
+      GROUP BY links.id;
     `;
 
-    const result = await commitToDb(client.query(query, [linkId])); //const result = await commitToDb(client.query(query, [linkId, userId]));
+    const result = await client.query(query, [linkId]);
 
-    if (result instanceof Error) {
-      reply.status(500).send(result.message);
+    if (result.rows.length > 0) {
+      reply.send(result.rows[0]);
     } else {
-      reply.send(result.rows);
+      reply.status(404).send("Link not found");
     }
   } catch (error) {
     app.log.error(error);

@@ -8,7 +8,8 @@ const api = axios.create({
 export function makeRequest(url, options) {
   return api(url, options)
     .then((res) => res.data)
-    .catch((error) =>
-      Promise.reject(error?.response?.data?.message ?? "Error")
-    );
+    .catch((error) => {
+      console.error("Request Error:", error);
+      return Promise.reject(error?.response?.data?.message ?? "Error");
+    });
 }
