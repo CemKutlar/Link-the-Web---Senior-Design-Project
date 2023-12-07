@@ -1,25 +1,49 @@
-import React from "react";
+import React, { useContext, useMemo } from "react";
 import { useAsync } from "../hooks/useAsync";
 import { getLink } from "../services/links";
 import { useParams } from "react-router-dom";
 
 const Context = React.createContext();
 
+export function useLink() {
+  return useContext(Context);
+}
+
 export function LinkProvider({ children }) {
   const { id } = useParams();
-  console.log(id);
   const { loading, error, value: link } = useAsync(() => getLink(id), [id]);
+  const commentsByParentId = useMemo(() => {
+    if (link?.comments == null) return [];
+    const group = {};
+    link.comments.forEach((comment) => {
+      const parentId = comment.parentId || null;
+      group[parentId] = group[parentId] || [];
+      group[parentId].push(comment);
+    });
+    return group;
+  }, [link?.comments]);
+  // console.log(link);
+  console.log(commentsByParentId);
 
-  if (loading) {
-    return <div>Loading...</div>; // Or any loading indicator
+  function getReplies(parentId) {
+    return commentsByParentId[parentId];
   }
 
-  if (error) {
-    console.error("Error in LinkProvider:", error);
-    return <div>Error: {error.message}</div>; // Display error message
-  }
-
-  console.log(link); // Now, link should not be undefined if there's no error and loading is done
-
-  return <Context.Provider value={{ link }}>{children}</Context.Provider>;
+  return (
+    <Context.Provider
+      value={{
+        link: { id, ...link },
+        getReplies,
+        rootComments: commentsByParentId[null] || [],
+      }}
+    >
+      {loading ? (
+        <h1>Loading</h1>
+      ) : error ? (
+        <h1 className="error-msg">{error}</h1>
+      ) : (
+        children
+      )}
+    </Context.Provider>
+  );
 }
