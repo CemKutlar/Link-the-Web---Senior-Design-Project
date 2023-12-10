@@ -1,4 +1,4 @@
-name: s3-deploy
+name: ECR Deploy
 
 on:
   push:
@@ -8,12 +8,20 @@ on:
       - "frontend/**"
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-v4-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -25,7 +33,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "17"
 
       - name: Install dependencies
         run: cd frontend && npm install
@@ -33,7 +41,6 @@ jobs:
       - name: Install Amplify CLI
         run: npm install -g @aws-amplify/cli
 
-      # Check if Amplify is configured
       - name: Check Amplify Configuration
         id: check-config
         run: |
@@ -44,16 +51,13 @@ jobs:
           fi
         working-directory: ./frontend
 
-      # If Amplify is not configured, configure it
       - name: Configure Amplify
         if: steps.check-config.outputs.isConfigured == 'false'
         run: amplify configure --accessKeyId ${{ secrets.AWS_ACCESS_KEY_ID }} --secretAccessKey ${{ secrets.AWS_SECRET_ACCESS_KEY }} --region ${{ secrets.AWS_REGION }} --yes
 
-      # Initialize Amplify
       - name: Initialize Amplify
         run: cd frontend && amplify init --yes
 
-      # Pull the latest backend changes
       - name: Pull Amplify Changes
         run: cd frontend && amplify pull --yes
 
@@ -63,8 +67,24 @@ jobs:
       - name: Build React App
         run: cd frontend && npm run build
 
-      - name: Deploy build folder to S3 bucket
-        run: aws s3 sync ./frontend/build s3://www.linktheweb.com --delete
+      - name: Rebuild SASS package
+        run: npm rebuild node-sass
 
-      - name: Invalidate CloudFront cache
-        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_DISTRIBUTION_ID }} --paths "/*"
+      # Build Docker image
+      - name: Build Docker image
+        run: docker build -t frontend-repo:latest ./frontend
+
+      # Authenticate with ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # Tag the image for ECR
+      - name: Tag Docker image
+        run: docker tag frontend-repo:latest ${{ steps.login-ecr.outputs.registry }}/frontend-repo:latest
+
+      # Push the Docker image to ECR
+      - name: Push Docker image to ECR
+        run: docker push ${{ steps.login-ecr.outputs.registry }}/frontend-repo:latest
+
+      # Additional steps like cache invalidation can be added here if needed
