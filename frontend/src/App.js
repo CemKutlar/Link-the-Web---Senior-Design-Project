@@ -8,6 +8,7 @@ import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import {
+<<<<<<< HEAD
   BrowserRouter as Router, // Corrected this line
   Routes,
   Route, // Make sure to import Route
@@ -19,6 +20,17 @@ import SearchPage from "./Search";
 import { useEffect, useState } from "react";
 import LinkPage from "./LinkPage";
 import NodePage from "./NodePage"; 
+=======
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Link,
+  useLocation,
+} from "react-router-dom";
+import SearchPage from "./Search";
+import { useEffect, useState } from "react";
+import LinkPage from "./LinkPage";
+>>>>>>> test
 
 Amplify.configure({
   Auth: {
@@ -105,9 +117,13 @@ console.log(Router);
 export default function App() {
   const [signedIn, setSignedIn] = useState(false);
   const location = useLocation();
+<<<<<<< HEAD
   if (signedIn) {
     console.log("User SignedIn true!");
   }
+=======
+
+>>>>>>> test
   useEffect(() => {
     checkAuthState();
   }, []);
@@ -125,7 +141,11 @@ export default function App() {
     // <div className="gradient-bg">
     //   <svg xmlns="http://www.w3.org/2000/svg">
     //     <defs>
+<<<<<<< HEAD
     //       <filter id="dsagdssdsohgkömsdadfadsdsffsfdsfsfsdafdsjjk">
+=======
+    //       <filter id="goo">
+>>>>>>> test
     //         <feGaussianBlur
     //           in="SourceGraphic"
     //           stdDeviation="10"
@@ -147,7 +167,11 @@ export default function App() {
     //     <div className="g3"></div>
     //     <div className="g4"></div>
     //     <div className="g5"></div>
+<<<<<<< HEAD
     //     <div className="interactiveeeee"></div>
+=======
+    //     <div className="interactive"></div>
+>>>>>>> test
     //   </div>
 
     <div className="app-container">
@@ -171,9 +195,12 @@ export default function App() {
             <li>
               <Link to="/linkpage">Link Page</Link>
             </li>
+<<<<<<< HEAD
             <li>
               <Link to="/nodepage">Node Page</Link>
               </li>
+=======
+>>>>>>> test
           </ul>
         </nav>
       </div>
@@ -190,7 +217,10 @@ export default function App() {
         />
         <Route path="/linkpage" element={<LinkPage />} />
         <Route path="/search" element={<SearchPage />} />
+<<<<<<< HEAD
         <Route path="/nodepage" element={<NodePage />} />
+=======
+>>>>>>> test
       </Routes>
 
       {location.pathname === "/" && (
