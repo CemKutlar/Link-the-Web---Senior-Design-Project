@@ -1,0 +1,209 @@
+<!-- Code from d3-graph-gallery.com -->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>D3.js Network Graph with Tooltip</title>
+  <!-- Load d3.js -->
+  <script src="https://d3js.org/d3.v4.js"></script>
+
+  <style>
+    .tooltip {
+      position: absolute;
+      background-color: #f9f9f9;
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      padding: 5px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <input type="text" id="nodeIds" placeholder="Enter Node IDs (comma-separated)">
+  <button id="addNodeButton">Add Node</button>
+
+  <!-- Create a div where the graph will take place -->
+  <div id="my_dataviz"></div>
+
+
+  <script>
+
+  // set the dimensions and margins of the graph
+  var margin = {top: 10, right: 30, bottom: 30, left: 40},
+    width = 400 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+  // append the svg object to the body of the page
+  var svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+  //d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_network.json", function( data) {
+    var data = {
+    nodes: [
+      { id: 1 },
+      { id: 2 },
+      { id: 3 }
+    ],
+    links: [
+      { source: 1, target: 2 },
+      { source: 2, target: 3 }
+    ]
+  };
+
+    // Initialize the links
+    var link = svg
+      .selectAll("line")
+      .data(data.links)
+      .enter()
+      .append("line")
+        .style("stroke", "#aaa")
+
+    var tooltip = d3.select("body")
+      .append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+    // Initialize the nodes
+    var node = svg
+      .selectAll("circle")
+      .data(data.nodes)
+      .enter()
+      .append("circle")
+      .attr("r", 20)
+      .style("fill", "#69b3a2")
+
+      .on("mouseover", function(d) {
+        tooltip.transition()
+          .duration(200)
+          .style("opacity", .9);
+        tooltip.html("Node ID: " + d.id) // Customize tooltip content as needed
+          .style("left", (d3.event.pageX) + "px")
+          .style("top", (d3.event.pageY - 28) + "px");
+      })
+      // Add mouseout event listener
+      .on("mouseout", function(d) {
+        tooltip.transition()
+          .duration(500)
+          .style("opacity", 0);
+      })
+      
+      
+      .on("click", function(d) {
+        // Perform actions upon node click (e.g., display ID)
+        alert("Clicked Node ID: " + d.id);
+      });
+
+
+
+    // Let's list the force we wanna apply on the network
+    var simulation = d3.forceSimulation(data.nodes)                 // Force algorithm is applied to data.nodes
+        .force("link", d3.forceLink()                               // This force provides links between nodes
+              .id(function(d) { return d.id; })                     // This provide  the id of a node
+              .links(data.links)                                    // and this the list of links
+        )
+        .force("charge", d3.forceManyBody().strength(-400))         // This adds repulsion between nodes. Play with the -400 for the repulsion strength
+        .force("center", d3.forceCenter(width / 2, height / 2))     // This force attracts nodes to the center of the svg area
+        .on("end", ticked);
+
+    // This function is run at each iteration of the force algorithm, updating the nodes position.
+    function ticked() {
+      var link = svg.selectAll("line")
+        .data(data.links);
+
+      link.enter()
+        .append("line")
+        .style("stroke", "#aaa")
+        .merge(link);
+
+      link.exit().remove();
+
+      var node = svg.selectAll("circle")
+        .data(data.nodes);
+
+      node.enter()
+        .append("circle")
+        .attr("r", 20)
+        .style("fill", "#69b3a2")
+        .merge(node);
+
+      node.exit().remove();
+
+      link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+      node.attr("cx", function (d) { return d.x+10; })
+        .attr("cy", function(d) { return d.y-10; });
+    }
+
+
+  d3.select("#addNodeButton")
+    .on("click", function() {
+      var ids = document.getElementById("nodeIds").value.split(",").map(id => parseInt(id.trim()));
+      var newNodeId = Math.max(...data.nodes.map(d => d.id)) + 1;
+      data.nodes.push({ id: newNodeId });
+      ids.forEach(id => {
+        data.links.push({ source: id, target: newNodeId });
+      });
+      // Update the graph visualization
+      // You would need to update the node, link positions, and restart the simulation here
+      updateGraph();
+    });
+
+  function updateGraph() {
+    // Update the links
+    var link = svg.selectAll("line")
+      .data(data.links);
+
+    link.enter()
+      .append("line")
+      .style("stroke", "#aaa")
+      .merge(link);
+
+    link.exit().remove();
+
+    // Update the nodes
+    var node = svg.selectAll("circle")
+      .data(data.nodes);
+
+    node.enter()
+      .append("circle")
+      .attr("r", 20)
+      .style("fill", "#69b3a2")
+      .merge(node)
+      .on("mouseover", function(d) {
+        tooltip.transition()
+        .duration(200)
+          .style("opacity", .9);
+        tooltip.html("Node ID: " + d.id)
+          .style("left", (d3.event.pageX) + "px")
+          .style("top", (d3.event.pageY - 28) + "px");
+      })
+      .on("mouseout", function(d) {
+        tooltip.transition()
+          .duration(500)
+          .style("opacity", 0);
+      })
+      .on("click", function(d) {
+        alert("Clicked Node ID: " + d.id);
+      });
+
+    node.exit().remove();
+
+    // Re-apply the simulation to the updated nodes and links
+    simulation.nodes(data.nodes);
+    simulation.force("link").links(data.links);
+    simulation.alpha(1).restart();
+  }
+
+  </script>
+  </body>
+  </html>

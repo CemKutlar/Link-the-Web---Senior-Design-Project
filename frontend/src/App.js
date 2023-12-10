@@ -1,13 +1,24 @@
 import React from "react";
 import { SearchField } from "@aws-amplify/ui-react";
-import "./App.css";
+import "./styles/App.css";
+import "./styles/style.scss";
 import { Amplify } from "aws-amplify";
+import { Auth } from "@aws-amplify/auth";
 import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router, // Corrected this line
+  Routes,
+  Route, // Make sure to import Route
+  Link,
+  useLocation,
+} from "react-router-dom";
 
-import About from "./About";
+import SearchPage from "./Search";
+import { useEffect, useState } from "react";
+import LinkPage from "./LinkPage";
+import NodePage from "./NodePage"; 
 
 Amplify.configure({
   Auth: {
@@ -89,31 +100,83 @@ const formFields = {
     },
   },
 };
+console.log(Router);
 
 export default function App() {
-  return (
-    <Router>
-      <nav>
-        <ul>
-          <li>
-            <Link to="/">Home!</Link>
-          </li>
-          <li>
-            <Link to="/about">About!</Link>
-          </li>
-        </ul>
-      </nav>
+  const [signedIn, setSignedIn] = useState(false);
+  const location = useLocation();
+  if (signedIn) {
+    console.log("User SignedIn true!");
+  }
+  useEffect(() => {
+    checkAuthState();
+  }, []);
 
-          {/* Add the SearchField component with custom styles */}
-      <div className="small-search-container">
+  const checkAuthState = async () => {
+    try {
+      await Auth.currentAuthenticatedUser();
+      setSignedIn(true);
+    } catch (error) {
+      setSignedIn(false);
+    }
+  };
+
+  return (
+    // <div className="gradient-bg">
+    //   <svg xmlns="http://www.w3.org/2000/svg">
+    //     <defs>
+    //       <filter id="dsagdssdsohgkömsdadfadsdsffsfdsfsfsdafdsjjk">
+    //         <feGaussianBlur
+    //           in="SourceGraphic"
+    //           stdDeviation="10"
+    //           result="blur"
+    //         />
+    //         <feColorMatrix
+    //           in="blur"
+    //           mode="matrix"
+    //           values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"
+    //           result="goo"
+    //         />
+    //         <feBlend in="SourceGraphic" in2="goo" />
+    //       </filter>
+    //     </defs>
+    //   </svg>
+    //   <div className="gradients-container">
+    //     <div className="g1"></div>
+    //     <div className="g2"></div>
+    //     <div className="g3"></div>
+    //     <div className="g4"></div>
+    //     <div className="g5"></div>
+    //     <div className="interactiveeeee"></div>
+    //   </div>
+
+    <div className="app-container">
+      <div className="search-container">
         <SearchField
           label="Search"
           placeholder="Search here..."
           labelHidden={false}
-          className="small-search-field" // Apply custom styles to the search field
+          className="search-field"
         />
       </div>
-      
+      <div className="nav">
+        <nav>
+          <ul>
+            <li>
+              <Link to="/">Link The Web</Link>
+            </li>
+            <li>
+              <Link to="/search">No-Link-Found Page</Link>
+            </li>
+            <li>
+              <Link to="/linkpage">Link Page</Link>
+            </li>
+            <li>
+              <Link to="/nodepage">Node Page</Link>
+              </li>
+          </ul>
+        </nav>
+      </div>
       <Routes>
         <Route
           path="/"
@@ -125,8 +188,29 @@ export default function App() {
             </div>
           }
         />
-        <Route path="/about" element={<About />} />
+        <Route path="/linkpage" element={<LinkPage />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/nodepage" element={<NodePage />} />
       </Routes>
-    </Router>
+
+      {location.pathname === "/" && (
+        <div className="how-to-use-section">
+          <h2>How to Use</h2>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas
+            convallis ac enim vel venenatis. Vestibulum non nisl in arcu
+            ultrices congue sit amet vel turpis. Proin congue consequat
+            malesuada. Sed accumsan iaculis nisi luctus elementum. Ut aliquet
+            tortor ut convallis mollis. Vivamus volutpat, lacus non placerat
+            elementum, enim enim lobortis nibh, a molestie lectus erat at urna.
+            Pellentesque tempor pharetra quam, vel varius augue efficitur ac.
+            Aenean pulvinar pellentesque neque, ut viverra ante lacinia et. Cras
+            commodo erat vel tempor ullamcorper. Cras eget feugiat tortor, quis
+            condimentum odio. Aenean pretium magna erat, non mattis odio
+            vulputate at. Aliquam pretium gravida interdum.
+          </p>
+        </div>
+      )}
+    </div>
   );
 }

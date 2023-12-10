@@ -1,0 +1,15 @@
+.container {
+  display: flex;
+  justify-content: center; /* Center the search bar horizontally */
+  padding: 2rem; /* Add padding at the top, left, and right */
+ 
+  
+  @media (max-width: 768px) { /* Tablets and mobile devices */
+    padding: 1rem;
+  }
+}
+
+.searchField {
+  width: 100%; /* Ensure it takes up full width of the container */
+  max-width: 800px; /* Or whatever maximum width you want */
+}
