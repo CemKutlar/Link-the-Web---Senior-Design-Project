@@ -56,11 +56,7 @@ body {
 .search-container {
   display: flex;
   flex-direction: column;
-<<<<<<< HEAD
-  
-=======
   background-color: #f2f2f2;
->>>>>>> berk
   padding: 10px;
   width: 400px;
   margin: 20px auto; /* Set top and bottom margin to 20px and auto for left and right */
@@ -106,58 +102,6 @@ body {
   color: white;
   padding: 20px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  transition: width 0.3s, opacity 0.3s, visibility 0s 0.3s; 
-  overflow: hidden; 
-  opacity: .01; 
-  visibility: visible; 
+  justify-content: center; /* Horizontal centering */
 }
 
-.nav:hover {
-  width: 200px; /* Set the width for the expanded state on hover */
-  opacity: 1; /* Make the texts fully visible */
-}
-
-/* Rest of your navigation styles remain the same */
-.nav ul {
-  list-style: none;
-  padding: 0;
-  width: 100%;
-}
-
-.nav ul li {
-  margin-bottom: 10px;
-  width: 100%;
-}
-
-.nav a {
-  text-decoration: none;
-  color: white;
-  display: block;
-  padding: 10px;
-  border-radius: 5px;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.nav a:hover {
-  background-color: #61dafb;
-  color: #282c34;
-}
-
-
-.how-to-use-section {
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #fff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.how-to-use-section h2 {
-  color: #282c34;
-}
-
-.how-to-use-section p {
-  color: #333;
-}

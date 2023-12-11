@@ -1,13 +1,21 @@
 import React from "react";
+<<<<<<< HEAD
 // import { SearchField } from "@aws-amplify/ui-react";
 import "./styles/App.css";
+=======
+import { SearchField } from "@aws-amplify/ui-react";
+import "./styles/styles/App.css";
+import "./styles/style.scss";
+>>>>>>> berk
 import "./styles/style.scss";
 import { Amplify } from "aws-amplify";
+import { Auth } from "@aws-amplify/auth";
 import { Auth } from "@aws-amplify/auth";
 import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import {
+<<<<<<< HEAD
   BrowserRouter as Router,
   Routes,
   Route,
@@ -20,6 +28,20 @@ import { useEffect, useState } from "react";
 import LinkPage from "./LinkPage";
 import SearchComponent from "./components/SearchBar";
 import { LinkProvider } from "./contexts/LinkContext";
+=======
+  BrowserRouter as Router, // Corrected this line
+  Routes,
+  Route, // Make sure to import Route
+  Link,
+  useLocation,
+} from "react-router-dom";
+
+import SearchPage from "./Search";
+import { useEffect, useState } from "react";
+import LinkPage from "./LinkPage";
+import NodePage from "./NodePage"; 
+
+>>>>>>> berk
 Amplify.configure({
   Auth: {
     region: awsExports.REGION,
@@ -151,7 +173,19 @@ export default function App() {
     //   </div>
 
     <div className="app-container">
+<<<<<<< HEAD
       <SearchComponent />
+=======
+      <div className="search-container">
+        <SearchField
+          label="Search"
+          placeholder="Search here..."
+          labelHidden={false}
+          className="search-field"
+          
+        />
+      </div>
+>>>>>>> berk
       <div className="nav">
         <nav>
           <ul>
@@ -164,6 +198,9 @@ export default function App() {
             <li>
               <Link to="/linkpage">Link Page</Link>
             </li>
+            <li>
+              <Link to="/nodepage">Node Page</Link>
+              </li>
           </ul>
         </nav>
       </div>
@@ -189,6 +226,7 @@ export default function App() {
           }
         />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/nodepage" element={<NodePage />} />
       </Routes>
 
       {location.pathname === "/" && (
