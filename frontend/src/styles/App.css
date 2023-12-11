@@ -56,11 +56,9 @@ body {
 .search-container {
   display: flex;
   flex-direction: column;
-<<<<<<< HEAD
-  
-=======
+
   background-color: #f2f2f2;
->>>>>>> berk
+
   padding: 10px;
   width: 400px;
   margin: 20px auto; /* Set top and bottom margin to 20px and auto for left and right */
