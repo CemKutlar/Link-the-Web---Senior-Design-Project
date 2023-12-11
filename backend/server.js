@@ -6,15 +6,45 @@ import pg from "pg";
 const { Pool } = pg;
 import dotenv from "dotenv";
 dotenv.config();
+import { Server } from "socket.io";
+import http from "http";
 
 const app = fastify();
+
+const server = http.createServer(app);
+
 app.register(sensible);
+
 app.register(cors, {
   origin: process.env.CLIENT_URL,
   credentials: true,
 });
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+});
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"]
+  }
+});
+io.on("connection", (socket) => {
+  console.log(`User Connected: ${socket.id}`);
+
+  socket.on("join_room", (data) => {
+    socket.join(data);
+    console.log(`User with ID: ${socket.id} joined room: ${data}`);
+  });
+
+  socket.on("send_message", (data) => {
+    socket.to(data.room).emit("receive_message", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User Disconnected", socket.id);
+  });
 });
 
 // Define a route to fetch data from your database
@@ -124,3 +154,7 @@ async function commitToDb(promise) {
 }
 
 app.listen({ port: process.env.PORT });
+
+server.listen(3001, () => {
+  console.log("SERVER RUNNING");
+});

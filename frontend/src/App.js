@@ -1,4 +1,6 @@
 import React from "react";
+import Chat from "./Chat.js";
+import io from "socket.io-client";
 // import { SearchField } from "@aws-amplify/ui-react";
 import "./styles/App.css";
 import "./styles/style.scss";
@@ -27,6 +29,7 @@ Amplify.configure({
     userPoolWebClientId: awsExports.USER_POOL_CLIENT_ID,
   },
 });
+const socket = io.connect("http://localhost:3001");
 
 const formFields = {
   signIn: {
@@ -105,6 +108,16 @@ console.log(Router);
 export default function App() {
   const [signedIn, setSignedIn] = useState(false);
   const location = useLocation();
+  const [username, setUsername] = useState("");
+  const [room, setRoom] = useState("");
+  const [showChat, setShowChat] = useState(false);
+
+  const joinRoom = () =>{
+    if (username !== "" && room !== "") {
+      socket.emit("join_room", room);
+      setShowChat(true);
+    }
+  }
   if (signedIn) {
     console.log("User SignedIn true!");
   }
@@ -207,8 +220,30 @@ export default function App() {
             condimentum odio. Aenean pretium magna erat, non mattis odio
             vulputate at. Aliquam pretium gravida interdum.
           </p>
-        </div>
+          </div>
       )}
-    </div>
+          {!showChat ? (
+        <div className="joinChatContainer">
+          <h3>Join A Chat</h3>
+          <input
+            type="text"
+            placeholder="John..."
+            onChange={(event) => {
+              setUsername(event.target.value);
+            }}
+          />
+          <input
+            type="text"
+            placeholder="Room ID..."
+            onChange={(event) => {
+              setRoom(event.target.value);
+            }}
+          />
+          <button onClick={joinRoom}>Join A Room</button>
+        </div>
+      ) : (
+        <Chat socket={socket} username={username} room={room} />
+      )}
+        </div>
   );
 }
