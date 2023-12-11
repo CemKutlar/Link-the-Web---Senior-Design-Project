@@ -112,12 +112,12 @@ export default function App() {
   const [room, setRoom] = useState("");
   const [showChat, setShowChat] = useState(false);
 
-  const joinRoom = () =>{
+  const joinRoom = () => {
     if (username !== "" && room !== "") {
       socket.emit("join_room", room);
       setShowChat(true);
     }
-  }
+  };
   if (signedIn) {
     console.log("User SignedIn true!");
   }
@@ -220,9 +220,9 @@ export default function App() {
             condimentum odio. Aenean pretium magna erat, non mattis odio
             vulputate at. Aliquam pretium gravida interdum.
           </p>
-          </div>
+        </div>
       )}
-          {!showChat ? (
+      {!showChat ? (
         <div className="joinChatContainer">
           <h3>Join A Chat</h3>
           <input
@@ -244,6 +244,6 @@ export default function App() {
       ) : (
         <Chat socket={socket} username={username} room={room} />
       )}
-        </div>
+    </div>
   );
 }
