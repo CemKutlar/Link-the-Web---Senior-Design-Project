@@ -26,7 +26,7 @@ const pool = new Pool({
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: `http://localhost:3000`,
     methods: ["GET", "POST"],
   },
 });
@@ -153,12 +153,12 @@ async function commitToDb(promise) {
   return data;
 }
 
-app.listen({ port: process.env.PORT });
-
 app.listen({ port: process.env.PORT }, (err) => {
   if (err) {
     console.error(err);
     process.exit(1);
   }
-  console.log(`Server is running on http://localhost:${process.env.PORT}`);
+});
+server.listen(3001, () => {
+  console.log("SERVER RUNNING");
 });

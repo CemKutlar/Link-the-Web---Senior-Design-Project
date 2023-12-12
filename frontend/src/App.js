@@ -127,7 +127,8 @@ export default function App() {
 
   const checkAuthState = async () => {
     try {
-      await Auth.currentAuthenticatedUser();
+      const user = await Auth.currentAuthenticatedUser();
+      setUsername(user);
       setSignedIn(true);
     } catch (error) {
       setSignedIn(false);

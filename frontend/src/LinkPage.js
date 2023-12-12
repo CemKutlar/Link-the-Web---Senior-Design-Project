@@ -1,12 +1,26 @@
 import * as React from "react";
 //import { SearchField } from "@aws-amplify/ui-react";
 import styles from "./styles/LinkPage.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "@aws-amplify/ui-react/styles.css";
 import { LinkList } from "./components/LinkList";
 import { useParams } from "react-router-dom";
+import io from "socket.io-client";
+import Chat from "./Chat";
+
 const LinkPage = () => {
   const { linkName } = useParams();
+  const [showChat, setShowChat] = useState(false);
+
+  useEffect(() => {
+    const socket = io.connect(`http://localhost:3001`);
+    socket.emit("join_room", linkName);
+    setShowChat(true);
+    return () => {
+      socket.disconnect();
+    };
+  }, [linkName]);
+
   return (
     <div className={styles.container}>
       <h1>Link Details</h1>
@@ -23,6 +37,7 @@ const LinkPage = () => {
           <Comment key={comment.id} data={comment} />
         ))}
       </div>
+      {showChat && <Chat socket={io.connect(`http://localhost:3001`)} />}
     </div>
   );
 };
