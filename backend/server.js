@@ -155,6 +155,10 @@ async function commitToDb(promise) {
 
 app.listen({ port: process.env.PORT });
 
-server.listen(3001, () => {
-  console.log("SERVER RUNNING");
+app.listen({ port: process.env.PORT }, (err) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  console.log(`Server is running on http://localhost:${process.env.PORT}`);
 });
