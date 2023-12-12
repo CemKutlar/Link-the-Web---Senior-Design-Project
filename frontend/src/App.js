@@ -1,9 +1,8 @@
 import React from "react";
-import Chat from "./Chat.js";
-import io from "socket.io-client";
+
 // import { SearchField } from "@aws-amplify/ui-react";
 import "./styles/App.css";
-import { SearchField } from "@aws-amplify/ui-react";
+import { SearchField, components } from "@aws-amplify/ui-react";
 import "./styles/style.scss";
 import { Amplify } from "aws-amplify";
 import { Auth } from "@aws-amplify/auth";
@@ -28,6 +27,11 @@ import LinkPage from "./LinkPage";
 import NodePage from "./NodePage";
 import { makeRequest, makeAuthRequest } from "./services/makeRequests";
 
+import Chat from "./Chat.js";
+import io from "socket.io-client";
+
+import { useLinkName } from "./components/Link";
+
 Amplify.configure({
   Auth: {
     region: awsExports.REGION,
@@ -35,6 +39,7 @@ Amplify.configure({
     userPoolWebClientId: awsExports.USER_POOL_CLIENT_ID,
   },
 });
+
 const socket = io.connect("http://localhost:3001");
 
 const formFields = {
@@ -114,6 +119,9 @@ console.log(Router);
 export default function App() {
   const [signedIn, setSignedIn] = useState(false);
   const location = useLocation();
+
+  const linkName = useLinkName();
+
   const [username, setUsername] = useState("");
   const [room, setRoom] = useState("");
   const [showChat, setShowChat] = useState(false);
@@ -160,14 +168,14 @@ export default function App() {
     <div className="app-container">
       <SearchComponent />
 
-      <div className="search-container">
+      {/* <div className="search-container">
         <SearchField
           label="Search"
           placeholder="Search here..."
           labelHidden={false}
           className="search-field"
         />
-      </div>
+      </div> */}
 
       <div className="nav">
         <nav>
@@ -230,28 +238,30 @@ export default function App() {
           </p>
         </div>
       )}
-      {!showChat ? (
-        <div className="joinChatContainer">
-          <h3>Join A Chat</h3>
-          <input
-            type="text"
-            placeholder="John..."
-            onChange={(event) => {
-              setUsername(event.target.value);
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Room ID..."
-            onChange={(event) => {
-              setRoom(event.target.value);
-            }}
-          />
-          <button onClick={joinRoom}>Join A Room</button>
-        </div>
-      ) : (
-        <Chat socket={socket} username={username} room={room} />
-      )}
+
+      {location.pathname.includes("/links/") &&
+        (!showChat ? (
+          <div className="joinChatContainer">
+            <h3>Join A Chat for {linkName} </h3>
+            <input
+              type="text"
+              placeholder="John..."
+              onChange={(event) => {
+                setUsername(event.target.value);
+              }}
+            />
+            <input
+              type="text"
+              placeholder="Room ID..."
+              onChange={(event) => {
+                setRoom(event.target.value);
+              }}
+            />
+            <button onClick={joinRoom}>Join A Room</button>
+          </div>
+        ) : (
+          <Chat socket={socket} username={username} room={room} />
+        ))}
     </div>
   );
 }

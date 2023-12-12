@@ -4,7 +4,17 @@ import { CommentForm } from "./CommentForm";
 import { useAsyncFn } from "../hooks/useAsync";
 import { createComment } from "../services/comments";
 
+// Custom hook to get linkName
+export function useLinkName() {
+  const context = useLink();
+  if (!context || !context.link) {
+    return null; // or some default value
+  }
+  return context.link.name;
+}
+
 export function Linkk() {
+  const linkName = useLinkName(); // Use the custom hook
   const { link, rootComments, createLocalComment } = useLink();
   const {
     loading,
@@ -17,10 +27,11 @@ export function Linkk() {
       createLocalComment
     );
   }
+
   //console.log("In Linkk", link);
   return (
     <>
-      <h1>{link.name}</h1>
+      <h1>{linkName}</h1>
       <article>{link.description}</article>
       <h3 className="comments-tittle">Comments</h3>
       <section>
