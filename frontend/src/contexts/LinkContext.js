@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useAsync } from "../hooks/useAsync";
 import { getLink } from "../services/links";
 import { useParams } from "react-router-dom";
@@ -12,21 +12,34 @@ export function useLink() {
 export function LinkProvider({ children }) {
   const { id } = useParams();
   const { loading, error, value: link } = useAsync(() => getLink(id), [id]);
+  const [comments, setComments] = useState([]);
   const commentsByParentId = useMemo(() => {
-    if (link?.comments == null) return [];
+    if (comments == null) return [];
     const group = {};
-    link.comments.forEach((comment) => {
+    comments.forEach((comment) => {
       const parentId = comment.parentId || null;
       group[parentId] = group[parentId] || [];
       group[parentId].push(comment);
     });
     return group;
+  }, [comments]);
+
+  useEffect(() => {
+    if (link?.comments == null) return;
+    setComments(link.comments);
   }, [link?.comments]);
   // console.log(link);
-  console.log(commentsByParentId);
+  //console.log(commentsByParentId);
 
   function getReplies(parentId) {
     return commentsByParentId[parentId];
+  }
+
+  function createLocalComment(comment) {
+    console.log("New comment is this: ", comment);
+    setComments((prevComments) => {
+      return [comment, ...prevComments];
+    });
   }
 
   return (
@@ -34,6 +47,7 @@ export function LinkProvider({ children }) {
       value={{
         link: { id, ...link },
         getReplies,
+        createLocalComment,
         rootComments: commentsByParentId[null] || [],
       }}
     >

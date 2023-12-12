@@ -11,7 +11,18 @@ export function CommentForm({
 
   function handleSubmit(e) {
     e.preventDefault();
-    onSubmit(message).then(() => setMessage(""));
+    onSubmit(message)
+      .then(() => setMessage(""))
+      .catch((error) => {
+        // Check if the error is due to unauthenticated user
+        if (error.response && error.response.data.code === "UNAUTHENTICATED") {
+          // Alert the user to log in
+          alert("You must be logged in to post a comment.");
+        } else {
+          // Handle other types of errors (optional)
+          console.error("Failed to post comment:", error);
+        }
+      });
   }
 
   return (
@@ -27,7 +38,7 @@ export function CommentForm({
           {loading ? "Loading" : "Post"}
         </button>
       </div>
-      <div className="error-msg">{error}</div>
+      <div className="error-msg">You should be logged in to post a comment</div>
     </form>
   );
 }

@@ -5,7 +5,7 @@ import { useAsyncFn } from "../hooks/useAsync";
 import { createComment } from "../services/comments";
 
 export function Linkk() {
-  const { link, rootComments } = useLink();
+  const { link, rootComments, createLocalComment } = useLink();
   const {
     loading,
     error,
@@ -13,12 +13,11 @@ export function Linkk() {
   } = useAsyncFn(createComment);
 
   function onCommentCreate(message) {
-    return createCommentFn({ linkId: link.id, message }).then((comment) => {
-      // createLocalComment
-      console.log(comment);
-    });
+    return createCommentFn({ linkId: link.id, message }).then(
+      createLocalComment
+    );
   }
-  console.log("In Linkk", link);
+  //console.log("In Linkk", link);
   return (
     <>
       <h1>{link.name}</h1>
