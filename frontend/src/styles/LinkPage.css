@@ -49,7 +49,7 @@
   font-size: 16px;
 }
 
-.new-comment button {
+/* .new-comment button {
   background-color: #61dafb;
   color: white;
   padding: 10px 20px;
@@ -61,7 +61,7 @@
 
 .new-comment button:hover {
   background-color: #4fa3d7;
-}
+} */
 
 .comment, .reply {
   background-color: #f2f2f2;
@@ -84,7 +84,7 @@
   margin-top: 10px;
 }
 
-.votes button {
+/* .votes button {
   background-color: #61dafb;
   color: white;
   padding: 5px 10px;
@@ -96,7 +96,7 @@
 
 .votes button:hover {
   background-color: #4fa3d7;
-}
+} */
 
 .votes span {
   font-size: 16px;
