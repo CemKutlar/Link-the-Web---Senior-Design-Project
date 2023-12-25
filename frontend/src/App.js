@@ -127,10 +127,10 @@ export default function App() {
   const [showChat, setShowChat] = useState(false);
 
   const joinRoom = () => {
-    if (username !== "" && room !== "") {
-      socket.emit("join_room", room);
-      setShowChat(true);
-    }
+    // Use linkName directly for both username and room
+    const currentRoom = linkName;
+    socket.emit("join_room", currentRoom);
+    setShowChat(true);
   };
   if (signedIn) {
     console.log("User SignedIn true!");
@@ -151,6 +151,8 @@ export default function App() {
     try {
       const user = await Auth.currentAuthenticatedUser();
       const token = user.signInUserSession.idToken.jwtToken;
+      const authenticatedUsername = user.username;
+      setUsername(authenticatedUsername);
 
       // Send the token to your backend
       await makeRequest("/user/update-token", {
@@ -242,25 +244,10 @@ export default function App() {
       {location.pathname.includes("/links/") &&
         (!showChat ? (
           <div className="joinChatContainer">
-            <h3>Join A Chat for {linkName} </h3>
-            <input
-              type="text"
-              placeholder="John..."
-              onChange={(event) => {
-                setUsername(event.target.value);
-              }}
-            />
-            <input
-              type="text"
-              placeholder="Room ID..."
-              onChange={(event) => {
-                setRoom(event.target.value);
-              }}
-            />
-            <button onClick={joinRoom}>Join A Room</button>
+            <button onClick={joinRoom}>Join The Chat Room</button>
           </div>
         ) : (
-          <Chat socket={socket} username={username} room={room} />
+          <Chat socket={socket} username={username} room={linkName} />
         ))}
     </div>
   );
