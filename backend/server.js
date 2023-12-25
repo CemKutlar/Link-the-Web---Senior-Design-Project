@@ -596,6 +596,7 @@ app.post("/search-links-by-keywords", async (req, res) => {
 
 app.post("/create-link", async (req, res) => {
   const { name, description, keywords, relatedLinks } = req.body;
+  const badgeIdToAdd = "e3195c60-537d-4421-bfd6-49719831dd31"; // Badge ID to add
 
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
@@ -612,16 +613,31 @@ app.post("/create-link", async (req, res) => {
 
     const client = await pool.connect();
     try {
-      const userQuery = "SELECT id FROM users WHERE cognito_sub = $1";
+      await client.query("BEGIN");
+
+      // Fetch the user and their badges
+      const userQuery =
+        "SELECT id, badge_ids FROM users WHERE cognito_sub = $1";
       const userResponse = await client.query(userQuery, [userSub]);
       if (userResponse.rows.length === 0) {
         throw new Error("User not found");
       }
 
       const userId = userResponse.rows[0].id;
+      const userBadges = userResponse.rows[0].badge_ids || [];
 
-      await client.query("BEGIN");
+      // Check if user already has the badge
+      if (!userBadges.includes(badgeIdToAdd)) {
+        const updatedBadges = [...userBadges, badgeIdToAdd];
+        const updateBadgesQuery = `
+          UPDATE public.users
+          SET badge_ids = $1
+          WHERE id = $2;
+        `;
+        await client.query(updateBadgesQuery, [updatedBadges, userId]);
+      }
 
+      // Link creation logic
       const insertLinkQuery = `
         INSERT INTO public.links (name, description, creator_user_id)
         VALUES ($1, $2, $3)
@@ -862,6 +878,54 @@ app.get("/edge-vote-counts", async (req, res) => {
     res.status(500).send({ error: "Internal server error" });
   } finally {
     client.release();
+  }
+});
+
+app.get("/get-user-badges", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res
+      .status(401)
+      .send({ error: "Authentication required", code: "UNAUTHENTICATED" });
+  }
+
+  try {
+    await verifyCognitoToken(token);
+
+    const userId = req.query.userId; // Use the user ID passed from the frontend
+    if (!userId) {
+      return res.status(400).send({ error: "User ID is required" });
+    }
+
+    const client = await pool.connect();
+    try {
+      // Fetch the badge IDs for the given user ID
+      const userQuery = "SELECT badge_ids FROM users WHERE id = $1";
+      const userResponse = await client.query(userQuery, [userId]);
+      if (userResponse.rows.length === 0) {
+        throw new Error("User not found");
+      }
+
+      const badgeIds = userResponse.rows[0].badge_ids;
+
+      // Check if user has any badges
+      if (!badgeIds || badgeIds.length === 0) {
+        res.send({ badges: [] });
+      } else {
+        // Fetch badge details
+        const badgeQuery =
+          "SELECT id, badge_name FROM badges WHERE id = ANY($1::uuid[])";
+        const badgesResponse = await client.query(badgeQuery, [badgeIds]);
+        res.send({ badges: badgesResponse.rows });
+      }
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error fetching user badges:", error.message);
+    res.status(500).send({ error: "Internal server error" });
   }
 });
 

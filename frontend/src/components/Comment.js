@@ -11,6 +11,7 @@ import {
 } from "../services/comments";
 import { useAsyncFn } from "../hooks/useAsync";
 import { CommentForm } from "./CommentForm";
+import { Badge } from "./Badge";
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
@@ -85,6 +86,7 @@ export function Comment({
       <div className="comment">
         <div className="header">
           <span className="name">{user.name}</span>
+          <Badge userId={user.id} />
           <span className="date">{formatDate(createdAt)}</span>
         </div>
         {isEditing ? (

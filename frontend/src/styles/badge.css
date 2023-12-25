@@ -1,0 +1,18 @@
+/* Badge Styles */
+.badge-container {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 5px; /* Spacing between badges */
+  align-items: center; /* Align badges vertically center */
+  margin-left: 10px; /* Spacing from the user's name */
+}
+
+.badge {
+  background-color: rgba(222, 126, 233, 0.6); /* Change to your preferred color */
+  color: rgb(9, 0, 0);
+  padding: 2px 6px;
+  border-radius: 10px; /* Rounded corners for the badge */
+  font-size: 0.8rem; /* Smaller font size for badges */
+  white-space: nowrap; /* Prevents wrapping of text inside badge */
+  font: bolder;
+}
