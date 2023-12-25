@@ -38,7 +38,7 @@ export function CommentForm({
           {loading ? "Loading" : "Post"}
         </button>
       </div>
-      <div className="error-msg">You should be logged in to post a comment</div>
+      {/* <div className="error-msg">You should be logged in to post a comment</div> */}
     </form>
   );
 }

@@ -212,6 +212,7 @@ app.get("/check-link", async (req, res) => {
 
 app.get("/links/:id", async (request, reply) => {
   const linkId = request.params.id;
+  const userId = request.userId; // Retrieved from the preHandler hook
 
   const client = await pool.connect();
   try {
@@ -232,19 +233,29 @@ app.get("/links/:id", async (request, reply) => {
               'user', JSON_BUILD_OBJECT(
                 'id', users.id,
                 'name', users.name
-              )
+              ),
+              'likeCount', like_data.like_count,
+              'likedByMe', like_data.liked_by_me
             ) ORDER BY comments.created_at DESC
           ) FILTER (WHERE comments.id IS NOT NULL),
           '[]'
         ) AS comments
-      FROM public.links
-      LEFT JOIN public.comments ON links.id = comments.link_id
-      LEFT JOIN public.users ON comments.user_id = users.id
+      FROM links
+      LEFT JOIN comments ON links.id = comments.link_id
+      LEFT JOIN users ON comments.user_id = users.id
+      LEFT JOIN (
+        SELECT
+          comment_id,
+          COUNT(*) as like_count,
+          BOOL_OR(user_id = $2) as liked_by_me
+        FROM likes
+        GROUP BY comment_id
+      ) as like_data ON like_data.comment_id = comments.id
       WHERE links.id = $1
       GROUP BY links.id;
     `;
 
-    const result = await client.query(query, [linkId]);
+    const result = await client.query(query, [linkId, userId]);
 
     if (result.rows.length > 0) {
       reply.send(result.rows[0]);
@@ -310,13 +321,13 @@ app.post("/links/:id/comments", async (req, res) => {
           ? userNameResponse.rows[0].name
           : "Unknown User";
 
-      const likeCheckQuery =
-        "SELECT 1 FROM public.likes WHERE user_id = $1 AND comment_id = $2";
-      const likeCheckResponse = await client.query(likeCheckQuery, [
-        userId,
-        comment.id,
-      ]);
-      const likedByMe = likeCheckResponse.rowCount > 0;
+      // const likeCheckQuery =
+      //   "SELECT 1 FROM public.likes WHERE user_id = $1 AND comment_id = $2";
+      // const likeCheckResponse = await client.query(likeCheckQuery, [
+      //   userId,
+      //   comment.id,
+      // ]);
+      // const likedByMe = likeCheckResponse.rowCount > 0;
 
       res.send({
         ...comment,
@@ -327,7 +338,7 @@ app.post("/links/:id/comments", async (req, res) => {
         parentId: comment.parent_id,
         createdAt: comment.created_at,
         likeCount: 0, // Placeholder for like count
-        likedByMe: likedByMe,
+        likedByMe: false,
       });
     } finally {
       client.release();
@@ -338,11 +349,521 @@ app.post("/links/:id/comments", async (req, res) => {
   }
 });
 
+app.put("/links/:linkId/comments/:commentId", async (req, res) => {
+  console.log("Backend Put'a girdi");
+  const { linkId, commentId } = req.params;
+  const { message } = req.body;
+
+  if (!message || message.trim() === "") {
+    return res.status(400).send({ error: "Message is required" });
+  }
+
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res
+      .status(401)
+      .send({ error: "Authentication required", code: "UNAUTHENTICATED" });
+  }
+
+  try {
+    const userData = await verifyCognitoToken(token);
+    const userSub = userData.sub;
+
+    const client = await pool.connect();
+    try {
+      const userQuery = "SELECT id FROM users WHERE cognito_sub = $1";
+      const userResponse = await client.query(userQuery, [userSub]);
+      if (userResponse.rows.length === 0) {
+        throw new Error("User not found");
+      }
+
+      const userId = userResponse.rows[0].id;
+
+      // Check if the comment belongs to the user
+      const commentOwnerQuery = "SELECT user_id FROM comments WHERE id = $1";
+      const commentOwnerResponse = await client.query(commentOwnerQuery, [
+        commentId,
+      ]);
+      if (
+        commentOwnerResponse.rows.length === 0 ||
+        commentOwnerResponse.rows[0].user_id !== userId
+      ) {
+        return res
+          .status(403)
+          .send({ error: "You can only edit your own comments" });
+      }
+
+      const updateCommentQuery = `
+        UPDATE public."comments"
+        SET message = $1, updated_at = NOW()
+        WHERE id = $2 AND user_id = $3
+        RETURNING id, message, created_at, updated_at, user_id, parent_id;`;
+
+      const updateResponse = await client.query(updateCommentQuery, [
+        message,
+        commentId,
+        userId,
+      ]);
+      if (updateResponse.rows.length === 0) {
+        throw new Error("Comment not found or user mismatch");
+      }
+
+      const updatedComment = updateResponse.rows[0];
+
+      // Query to get user's name based on userId (as done in POST method)
+      const userNameQuery = "SELECT name FROM users WHERE id = $1";
+      const userNameResponse = await client.query(userNameQuery, [userId]);
+      const userName =
+        userNameResponse.rows.length > 0
+          ? userNameResponse.rows[0].name
+          : "Unknown User";
+
+      res.send({
+        ...updatedComment,
+        user: {
+          id: userId,
+          name: userName,
+        },
+        parentId: updatedComment.parent_id,
+        createdAt: updatedComment.created_at,
+        updatedAt: updatedComment.updated_at,
+        likeCount: 0,
+        likedByMe: false,
+      });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error in updating comment:", error.message);
+    return res.status(500).send({ error: "Internal server error" });
+  }
+});
+
+app.delete("/links/:linkId/comments/:commentId", async (req, res) => {
+  const { linkId, commentId } = req.params;
+
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res
+      .status(401)
+      .send({ error: "Authentication required", code: "UNAUTHENTICATED" });
+  }
+
+  try {
+    const userData = await verifyCognitoToken(token);
+    const userSub = userData.sub;
+
+    const client = await pool.connect();
+    try {
+      const userQuery = "SELECT id FROM users WHERE cognito_sub = $1";
+      const userResponse = await client.query(userQuery, [userSub]);
+
+      if (userResponse.rows.length === 0) {
+        throw new Error("User not found");
+      }
+
+      const userId = userResponse.rows[0].id;
+
+      // Check if the comment belongs to the user
+      const commentOwnerQuery = "SELECT user_id FROM comments WHERE id = $1";
+      const commentOwnerResponse = await client.query(commentOwnerQuery, [
+        commentId,
+      ]);
+
+      if (commentOwnerResponse.rows.length === 0) {
+        return res.status(404).send({ error: "Comment not found" });
+      }
+
+      if (commentOwnerResponse.rows[0].user_id !== userId) {
+        return res
+          .status(403)
+          .send({ error: "You can only delete your own comments" });
+      }
+
+      // Delete the comment
+      const deleteCommentQuery = "DELETE FROM public.comments WHERE id = $1";
+      await client.query(deleteCommentQuery, [commentId]);
+
+      res.send({ success: true, message: "Comment deleted successfully" });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error in deleting comment:", error.message);
+    return res.status(500).send({ error: "Internal server error" });
+  }
+});
+
+app.post("/links/:linkId/comments/:commentId/toggleLike", async (req, res) => {
+  const { commentId } = req.params;
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res
+      .status(401)
+      .send({ error: "Authentication required", code: "UNAUTHENTICATED" });
+  }
+
+  try {
+    const userData = await verifyCognitoToken(token);
+    const userSub = userData.sub;
+
+    const client = await pool.connect();
+    try {
+      const userQuery = "SELECT id FROM users WHERE cognito_sub = $1";
+      const userResponse = await client.query(userQuery, [userSub]);
+
+      if (userResponse.rows.length === 0) {
+        throw new Error("User not found");
+      }
+
+      const userId = userResponse.rows[0].id;
+
+      // Check if the like already exists
+      const likeQuery =
+        "SELECT 1 FROM likes WHERE user_id = $1 AND comment_id = $2";
+      const likeResponse = await client.query(likeQuery, [userId, commentId]);
+
+      if (likeResponse.rowCount === 0) {
+        // Like does not exist, so create it
+        const insertLikeQuery =
+          "INSERT INTO likes (user_id, comment_id) VALUES ($1, $2)";
+        await client.query(insertLikeQuery, [userId, commentId]);
+        res.send({ addLike: true });
+      } else {
+        // Like exists, so remove it
+        const deleteLikeQuery =
+          "DELETE FROM likes WHERE user_id = $1 AND comment_id = $2";
+        await client.query(deleteLikeQuery, [userId, commentId]);
+        res.send({ addLike: false });
+      }
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error in toggle like:", error.message);
+    return res.status(500).send({ error: "Internal server error" });
+  }
+});
+
+app.post("/search-links-by-keywords", async (req, res) => {
+  const { keywords } = req.body;
+
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res
+      .status(401)
+      .send({ error: "Authentication required", code: "UNAUTHENTICATED" });
+  }
+
+  try {
+    const userData = await verifyCognitoToken(token);
+    const userSub = userData.sub;
+
+    const client = await pool.connect();
+    try {
+      const userQuery = "SELECT id FROM users WHERE cognito_sub = $1";
+      const userResponse = await client.query(userQuery, [userSub]);
+      if (userResponse.rows.length === 0) {
+        throw new Error("User not found");
+      }
+
+      const query = `
+        SELECT l.*, COUNT(lk.keyword) AS keyword_match_count
+        FROM links l
+        INNER JOIN link_keywords lk ON l.id = lk.link_id
+        WHERE lk.keyword = ANY($1)
+        GROUP BY l.id
+        ORDER BY COUNT(lk.keyword) DESC;
+      `;
+      const result = await client.query(query, [keywords]);
+      res.send(result.rows);
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error searching links by keywords:", error.message);
+    return res.status(500).send({ error: "Internal server error" });
+  }
+});
+
+app.post("/create-link", async (req, res) => {
+  const { name, description, keywords, relatedLinks } = req.body;
+
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res
+      .status(401)
+      .send({ error: "Authentication required", code: "UNAUTHENTICATED" });
+  }
+
+  try {
+    const userData = await verifyCognitoToken(token);
+    const userSub = userData.sub;
+
+    const client = await pool.connect();
+    try {
+      const userQuery = "SELECT id FROM users WHERE cognito_sub = $1";
+      const userResponse = await client.query(userQuery, [userSub]);
+      if (userResponse.rows.length === 0) {
+        throw new Error("User not found");
+      }
+
+      const userId = userResponse.rows[0].id;
+
+      await client.query("BEGIN");
+
+      const insertLinkQuery = `
+        INSERT INTO public.links (name, description, creator_user_id)
+        VALUES ($1, $2, $3)
+        RETURNING id;
+      `;
+      const linkResult = await client.query(insertLinkQuery, [
+        name,
+        description,
+        userId,
+      ]);
+      const newLinkId = linkResult.rows[0].id;
+
+      for (const keyword of keywords) {
+        const insertKeywordQuery = `
+          INSERT INTO public.link_keywords (link_id, keyword)
+          VALUES ($1, $2);
+        `;
+        await client.query(insertKeywordQuery, [newLinkId, keyword]);
+      }
+
+      for (const relatedLinkId of relatedLinks) {
+        const insertRelatedLinkQuery = `
+          INSERT INTO public.related_links (link_id, related_link_id)
+          VALUES ($1, $2);
+        `;
+        await client.query(insertRelatedLinkQuery, [newLinkId, relatedLinkId]);
+      }
+
+      await client.query("COMMIT");
+      res.send({
+        success: true,
+        message: "Link created successfully",
+        linkId: newLinkId,
+      });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      console.error("Error creating new link:", error.message);
+      res.status(500).send({ error: "Internal server error" });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error verifying token:", error.message);
+    return res.status(500).send({ error: "Internal server error" });
+  }
+});
+
+app.get("/get-current-user", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res
+      .status(401)
+      .send({ error: "Authentication required", code: "UNAUTHENTICATED" });
+  }
+
+  try {
+    const userData = await verifyCognitoToken(token);
+    const userSub = userData.sub;
+
+    const client = await pool.connect();
+    try {
+      const userQuery = "SELECT id FROM users WHERE cognito_sub = $1";
+      const userResponse = await client.query(userQuery, [userSub]);
+      if (userResponse.rows.length === 0) {
+        throw new Error("User not found");
+      }
+
+      const userId = userResponse.rows[0].id;
+      res.send({ userId });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error fetching user:", error.message);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+
 async function commitToDb(promise) {
   const [error, data] = await app.to(promise);
   if (error) return app.httpErrors.internalServerError(error.message);
   return data;
 }
+
+app.get("/related-links/:linkId", async (req, res) => {
+  const linkId = req.params.linkId;
+
+  const client = await pool.connect();
+  try {
+    const query = `
+      WITH RECURSIVE related_links_cte AS (
+        SELECT 
+          rl.link_id, 
+          l1.name AS link_name,
+          l1.description AS link_description,
+          rl.related_link_id,
+          l2.name AS related_link_name,
+          l2.description AS related_link_description,
+          1 AS depth
+        FROM 
+          public.related_links rl
+          JOIN public.links l1 ON rl.link_id = l1.id
+          JOIN public.links l2 ON rl.related_link_id = l2.id
+        WHERE 
+          rl.link_id = $1 OR rl.related_link_id = $1
+
+        UNION ALL
+
+        SELECT 
+          rl.link_id,
+          l1.name,
+          l1.description,
+          rl.related_link_id,
+          l2.name,
+          l2.description,
+          cte.depth + 1
+        FROM 
+          public.related_links rl
+          JOIN public.links l1 ON rl.link_id = l1.id
+          JOIN public.links l2 ON rl.related_link_id = l2.id
+          INNER JOIN related_links_cte cte ON rl.link_id = cte.related_link_id OR rl.related_link_id = cte.link_id
+        WHERE 
+          cte.depth < 5
+      )
+      SELECT * FROM related_links_cte;
+    `;
+
+    const result = await client.query(query, [linkId]);
+    res.send(result.rows);
+  } catch (error) {
+    console.error("Error fetching related links:", error);
+    res.status(500).send({ error: "Internal server error" });
+  } finally {
+    client.release();
+  }
+});
+
+// Endpoint to handle edge votes
+app.post("/vote-edge", async (req, res) => {
+  console.log("vote-edge girdi !!!!!");
+  const { link_id, related_link_id, vote_type } = req.body;
+  const userId = req.userId; // Assuming you have user authentication set up
+
+  if (!userId) {
+    return res.status(401).send({ error: "Authentication required" });
+  }
+
+  const client = await pool.connect();
+  try {
+    // Begin a transaction
+    await client.query("BEGIN");
+
+    // Check if the user has already voted on this edge
+    const voteCheckQuery = `
+      SELECT vote_id FROM edge_votes
+      WHERE link_id = $1 AND related_link_id = $2 AND user_id = $3;
+    `;
+    const voteCheckResult = await client.query(voteCheckQuery, [
+      link_id,
+      related_link_id,
+      userId,
+    ]);
+
+    // If the user has voted, update the vote; otherwise, insert a new vote
+    if (voteCheckResult.rows.length > 0) {
+      const updateVoteQuery = `
+        UPDATE edge_votes
+        SET vote_type = $1, created_at = NOW()
+        WHERE vote_id = $2;
+      `;
+      await client.query(updateVoteQuery, [
+        vote_type,
+        voteCheckResult.rows[0].vote_id,
+      ]);
+    } else {
+      const insertVoteQuery = `
+        INSERT INTO edge_votes (link_id, related_link_id, user_id, vote_type)
+        VALUES ($1, $2, $3, $4);
+      `;
+      await client.query(insertVoteQuery, [
+        link_id,
+        related_link_id,
+        userId,
+        vote_type,
+      ]);
+    }
+
+    // Commit the transaction
+    await client.query("COMMIT");
+
+    res.send({ success: true, message: "Vote recorded" });
+  } catch (error) {
+    // Rollback the transaction in case of an error
+    await client.query("ROLLBACK");
+    console.error("Error recording vote:", error);
+    res.status(500).send({ error: "Internal server error" });
+  } finally {
+    client.release();
+  }
+});
+
+app.get("/edge-vote-counts", async (req, res) => {
+  console.log("edge-cote-count q girdi");
+  const { linkId, relatedLinkId } = req.query;
+
+  if (!linkId || !relatedLinkId) {
+    return res
+      .status(400)
+      .send({ error: "Link ID and related link ID are required" });
+  }
+
+  const client = await pool.connect();
+  try {
+    const voteCountQuery = `
+          SELECT 
+              vote_type, 
+              COUNT(*) as count 
+          FROM edge_votes 
+          WHERE link_id = $1 AND related_link_id = $2 
+          GROUP BY vote_type;
+      `;
+
+    const result = await client.query(voteCountQuery, [linkId, relatedLinkId]);
+    const voteCounts = result.rows.reduce(
+      (acc, row) => {
+        acc[row.vote_type] = parseInt(row.count, 10);
+        return acc;
+      },
+      { upvote: 0, downvote: 0 }
+    );
+
+    console.log(voteCounts);
+    res.send(voteCounts);
+  } catch (error) {
+    console.error("Error fetching vote counts:", error);
+    res.status(500).send({ error: "Internal server error" });
+  } finally {
+    client.release();
+  }
+});
 
 app.listen({ port: process.env.PORT }, (err) => {
   if (err) {

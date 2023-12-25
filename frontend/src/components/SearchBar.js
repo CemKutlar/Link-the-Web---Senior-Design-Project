@@ -24,6 +24,7 @@ function SearchComponent() {
         console.log("Link exists with ID:", response.id);
       } else {
         console.log("Link does not exist or no ID provided");
+        navigate(`/search`, { state: { searchTerm } });
       }
     } catch (error) {
       console.error("Error while checking link existence:", error);

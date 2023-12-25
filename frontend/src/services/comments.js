@@ -8,20 +8,20 @@ export function createComment({ linkId, message, parentId }) {
 }
 
 export function updateComment({ linkId, message, id }) {
-  return makeRequest(`posts/${linkId}/comments/${id}`, {
+  return makeAuthRequest(`links/${linkId}/comments/${id}`, {
     method: "PUT",
     data: { message },
   });
 }
 
 export function deleteComment({ linkId, id }) {
-  return makeRequest(`posts/${linkId}/comments/${id}`, {
+  return makeAuthRequest(`links/${linkId}/comments/${id}`, {
     method: "DELETE",
   });
 }
 
 export function toggleCommentLike({ id, linkId }) {
-  return makeRequest(`/links/${linkId}/comments/${id}/toggleLike`, {
+  return makeAuthRequest(`links/${linkId}/comments/${id}/toggleLike`, {
     method: "POST",
   });
 }

@@ -1,209 +1,317 @@
 <!-- Code from d3-graph-gallery.com -->
 <!DOCTYPE html>
-
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>D3.js Network Graph with Tooltip</title>
-  <!-- Load d3.js -->
-  <script src="https://d3js.org/d3.v4.js"></script>
+  <head>
+    <meta charset="utf-8" />
+    <title>D3.js Network Graph with Tooltip</title>
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
 
-  <style>
-    .tooltip {
-      position: absolute;
-      background-color: #f9f9f9;
-      border: 1px solid #aaa;
-      border-radius: 5px;
-      padding: 5px;
-      pointer-events: none;
-    }
-  </style>
-</head>
-<body>
+    <style>
+      .tooltip {
+        position: absolute;
+        background-color: #f9f9f9;
+        border: 1px solid #aaa;
+        border-radius: 5px;
+        padding: 5px;
+        display: none; /* Initially hide tooltip */
+      }
 
-  <input type="text" id="nodeIds" placeholder="Enter Node IDs (comma-separated)">
-  <button id="addNodeButton">Add Node</button>
+      line {
+        stroke-width: 2px; /* Make edges thicker */
+        cursor: pointer;
+      }
 
-  <!-- Create a div where the graph will take place -->
-  <div id="my_dataviz"></div>
+      circle {
+        r: 10px; /* Increase node size */
+        cursor: pointer;
+      }
 
+      #votePopup {
+        display: none; /* Hidden by default */
+        position: fixed; /* Positioned relative to the viewport */
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10; /* Above other items */
+        padding: 20px;
+        background: white;
+        border: 1px solid #aaa;
+        border-radius: 5px;
+      }
 
-  <script>
+      /* When the popup is visible, we add the "visible" class */
+      #votePopup.visible {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="my_dataviz"></div>
+    <div id="votePopup" class="hidden">
+      <div id="voteContent">
+        <button id="upvoteBtn">👍 <span id="upvoteCount">0</span></button>
+        <button id="downvoteBtn">👎 <span id="downvoteCount">0</span></button>
+      </div>
+    </div>
 
-  // set the dimensions and margins of the graph
-  var margin = {top: 10, right: 30, bottom: 30, left: 40},
-    width = 400 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+    <script>
+      document.addEventListener("DOMContentLoaded", async (event) => {
+        const params = new URLSearchParams(window.location.search);
+        const selectedLinkId = params.get("selectedLink");
+        const token = params.get("token");
+        console.log(selectedLinkId);
+        console.log(token);
+        try {
+          const response = await fetch(
+            `http://localhost:3002/related-links/${selectedLinkId}`
+          );
 
-  // append the svg object to the body of the page
-  var svg = d3.select("#my_dataviz")
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
 
-  //d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_network.json", function( data) {
-    var data = {
-    nodes: [
-      { id: 1 },
-      { id: 2 },
-      { id: 3 }
-    ],
-    links: [
-      { source: 1, target: 2 },
-      { source: 2, target: 3 }
-    ]
-  };
-
-    // Initialize the links
-    var link = svg
-      .selectAll("line")
-      .data(data.links)
-      .enter()
-      .append("line")
-        .style("stroke", "#aaa")
-
-    var tooltip = d3.select("body")
-      .append("div")
-      .attr("class", "tooltip")
-      .style("opacity", 0);
-
-    // Initialize the nodes
-    var node = svg
-      .selectAll("circle")
-      .data(data.nodes)
-      .enter()
-      .append("circle")
-      .attr("r", 20)
-      .style("fill", "#69b3a2")
-
-      .on("mouseover", function(d) {
-        tooltip.transition()
-          .duration(200)
-          .style("opacity", .9);
-        tooltip.html("Node ID: " + d.id) // Customize tooltip content as needed
-          .style("left", (d3.event.pageX) + "px")
-          .style("top", (d3.event.pageY - 28) + "px");
-      })
-      // Add mouseout event listener
-      .on("mouseout", function(d) {
-        tooltip.transition()
-          .duration(500)
-          .style("opacity", 0);
-      })
-      
-      
-      .on("click", function(d) {
-        // Perform actions upon node click (e.g., display ID)
-        alert("Clicked Node ID: " + d.id);
+          if (
+            response.headers.get("content-type").includes("application/json")
+          ) {
+            const relatedLinksData = await response.json();
+            const graphData = transformDataForD3(relatedLinksData);
+            drawGraph(graphData);
+          } else {
+            console.error("Not a JSON response");
+            // Handle non-JSON responses here
+          }
+        } catch (error) {
+          console.error("Error fetching or processing data:", error);
+          // Handle errors appropriately in your application context
+        }
       });
 
+      function transformDataForD3(data) {
+        const nodes = new Map();
+        const links = [];
 
+        data.forEach((link) => {
+          if (!nodes.has(link.link_id)) {
+            nodes.set(link.link_id, {
+              id: link.link_id,
+              name: link.link_name,
+              description: link.link_description,
+            });
+          }
+          if (!nodes.has(link.related_link_id)) {
+            nodes.set(link.related_link_id, {
+              id: link.related_link_id,
+              name: link.related_link_name,
+              description: link.related_link_description,
+            });
+          }
+          links.push({ source: link.link_id, target: link.related_link_id });
+        });
 
-    // Let's list the force we wanna apply on the network
-    var simulation = d3.forceSimulation(data.nodes)                 // Force algorithm is applied to data.nodes
-        .force("link", d3.forceLink()                               // This force provides links between nodes
-              .id(function(d) { return d.id; })                     // This provide  the id of a node
-              .links(data.links)                                    // and this the list of links
+        return { nodes: Array.from(nodes.values()), links };
+      }
+      function drag(simulation) {
+        function dragstarted(d) {
+          if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+          d.fx = d.x;
+          d.fy = d.y;
+        }
+
+        function dragged(d) {
+          d.fx = d3.event.x;
+          d.fy = d3.event.y;
+        }
+
+        function dragended(d) {
+          if (!d3.event.active) simulation.alphaTarget(0);
+          d.fx = null;
+          d.fy = null;
+        }
+
+        return d3
+          .drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended);
+      }
+
+      function drawGraph(data) {
+        const width = 800;
+        const height = 600;
+        const nodeRadius = 10; // Increased node radius
+
+        const svg = d3
+          .select("#my_dataviz")
+          .append("svg")
+          .attr("width", width)
+          .attr("height", height);
+
+        // Create a tooltip
+        const tooltip = d3
+          .select("#my_dataviz")
+          .append("div")
+          .attr("class", "tooltip");
+
+        const simulation = d3
+          .forceSimulation(data.nodes)
+          .force(
+            "link",
+            d3.forceLink(data.links).id((d) => d.id)
+          )
+          .force("charge", d3.forceManyBody())
+          .force("center", d3.forceCenter(width / 2, height / 2));
+
+        const link = svg
+          .append("g")
+          .selectAll("line")
+          .data(data.links)
+          .join("line")
+          .style("stroke", "#aaa");
+
+        const node = svg
+          .append("g")
+          .selectAll("circle")
+          .data(data.nodes)
+          .join("circle")
+          .attr("r", nodeRadius)
+          .style("fill", "#69b3a2")
+          .on("mouseover", function (d) {
+            tooltip
+              .style("display", "block")
+              .html(`Name: ${d.name}<br>Description: ${d.description}`)
+              .style("left", d3.event.pageX + 10 + "px")
+              .style("top", d3.event.pageY - 10 + "px");
+          })
+          .on("mouseout", function () {
+            tooltip.style("display", "none");
+          })
+          .on("click", function (d) {
+            // Navigate to the link page corresponding to the clicked node
+            window.top.location.href = `/links/${d.id}`; // Update this URL pattern as needed
+          });
+
+        simulation.on("tick", () => {
+          link
+            .attr("x1", (d) => d.source.x)
+            .attr("y1", (d) => d.source.y)
+            .attr("x2", (d) => d.target.x)
+            .attr("y2", (d) => d.target.y);
+
+          node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+        });
+        link.on("click", function (d) {
+          // Stop the click from propagating to the SVG canvas
+          d3.event.stopPropagation();
+
+          // Calculate the position for the popup
+          const x = (d.source.x + d.target.x) / 2;
+          const y = (d.source.y + d.target.y) / 2;
+
+          // Show the voting popup
+          showVotePopup(d, { x: x, y: y });
+        });
+      }
+
+      function voteForEdge(edge, voteType) {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
+
+        if (!token) {
+          console.error("Token not found");
+          return;
+        }
+
+        fetch("http://localhost:3002/vote-edge", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            link_id: edge.source.id,
+            related_link_id: edge.target.id,
+            vote_type: voteType,
+          }),
+        })
+          .then((response) => {
+            if (!response.ok)
+              throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Vote recorded:", data);
+            // Here you can update the UI to reflect the vote
+          })
+          .catch((error) => {
+            console.error("Error voting:", error);
+          });
+      }
+
+      function fetchAndUpdateVoteCounts(edge) {
+        fetch(
+          `http://localhost:3002/edge-vote-counts?linkId=${edge.source.id}&relatedLinkId=${edge.target.id}`
         )
-        .force("charge", d3.forceManyBody().strength(-400))         // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-        .force("center", d3.forceCenter(width / 2, height / 2))     // This force attracts nodes to the center of the svg area
-        .on("end", ticked);
+          .then((response) => {
+            if (!response.ok)
+              throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+          })
+          .then((voteCounts) => {
+            document.getElementById("upvoteCount").textContent =
+              voteCounts.upvote || 0;
+            document.getElementById("downvoteCount").textContent =
+              voteCounts.downvote || 0;
+          })
+          .catch((error) => {
+            console.error("Error fetching vote counts:", error);
+          });
+      }
 
-    // This function is run at each iteration of the force algorithm, updating the nodes position.
-    function ticked() {
-      var link = svg.selectAll("line")
-        .data(data.links);
+      function showVotePopup(edge, position) {
+        const popup = document.getElementById("votePopup");
+        popup.style.left = position.x + "px";
+        popup.style.top = position.y + "px";
+        popup.classList.add("visible");
 
-      link.enter()
-        .append("line")
-        .style("stroke", "#aaa")
-        .merge(link);
+        // Fetch the current vote counts for the edge
+        fetch(
+          `http://localhost:3002/edge-vote-counts?linkId=${edge.source.id}&relatedLinkId=${edge.target.id}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("upvoteCount").textContent =
+              data.upvoteCount || 0;
+            document.getElementById("downvoteCount").textContent =
+              data.downvoteCount || 0;
+          })
+          .catch((error) =>
+            console.error("Error fetching vote counts:", error)
+          );
 
-      link.exit().remove();
+        // Attach the edge data to the buttons for use in the voteForEdge function
+        document.getElementById("upvoteBtn").onclick = function () {
+          voteForEdge(edge, "upvote");
+          hideVotePopup();
+        };
+        document.getElementById("downvoteBtn").onclick = function () {
+          voteForEdge(edge, "downvote");
+          hideVotePopup();
+        };
+        fetchAndUpdateVoteCounts(edge);
+      }
 
-      var node = svg.selectAll("circle")
-        .data(data.nodes);
+      function hideVotePopup() {
+        const popup = document.getElementById("votePopup");
+        popup.classList.remove("visible");
+      }
 
-      node.enter()
-        .append("circle")
-        .attr("r", 20)
-        .style("fill", "#69b3a2")
-        .merge(node);
-
-      node.exit().remove();
-
-      link.attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
-
-      node.attr("cx", function (d) { return d.x+10; })
-        .attr("cy", function(d) { return d.y-10; });
-    }
-
-
-  d3.select("#addNodeButton")
-    .on("click", function() {
-      var ids = document.getElementById("nodeIds").value.split(",").map(id => parseInt(id.trim()));
-      var newNodeId = Math.max(...data.nodes.map(d => d.id)) + 1;
-      data.nodes.push({ id: newNodeId });
-      ids.forEach(id => {
-        data.links.push({ source: id, target: newNodeId });
-      });
-      // Update the graph visualization
-      // You would need to update the node, link positions, and restart the simulation here
-      updateGraph();
-    });
-
-  function updateGraph() {
-    // Update the links
-    var link = svg.selectAll("line")
-      .data(data.links);
-
-    link.enter()
-      .append("line")
-      .style("stroke", "#aaa")
-      .merge(link);
-
-    link.exit().remove();
-
-    // Update the nodes
-    var node = svg.selectAll("circle")
-      .data(data.nodes);
-
-    node.enter()
-      .append("circle")
-      .attr("r", 20)
-      .style("fill", "#69b3a2")
-      .merge(node)
-      .on("mouseover", function(d) {
-        tooltip.transition()
-        .duration(200)
-          .style("opacity", .9);
-        tooltip.html("Node ID: " + d.id)
-          .style("left", (d3.event.pageX) + "px")
-          .style("top", (d3.event.pageY - 28) + "px");
-      })
-      .on("mouseout", function(d) {
-        tooltip.transition()
-          .duration(500)
-          .style("opacity", 0);
-      })
-      .on("click", function(d) {
-        alert("Clicked Node ID: " + d.id);
-      });
-
-    node.exit().remove();
-
-    // Re-apply the simulation to the updated nodes and links
-    simulation.nodes(data.nodes);
-    simulation.force("link").links(data.links);
-    simulation.alpha(1).restart();
-  }
-
-  </script>
+      // Hide the popup when clicking anywhere in the window
+      window.onclick = function (event) {
+        if (event.target === document.getElementById("votePopup")) {
+          hideVotePopup();
+        }
+      };
+    </script>
   </body>
-  </html>
+</html>

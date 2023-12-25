@@ -3,7 +3,12 @@ import { FaEdit, FaHeart, FaRegHeart, FaReply, FaTrash } from "react-icons/fa";
 import { useLink } from "../contexts/LinkContext";
 import { CommentList } from "./CommentList";
 import { useState } from "react";
-import { createComment } from "../services/comments";
+import {
+  createComment,
+  updateComment,
+  deleteComment,
+  toggleCommentLike,
+} from "../services/comments";
 import { useAsyncFn } from "../hooks/useAsync";
 import { CommentForm } from "./CommentForm";
 
@@ -18,11 +23,29 @@ const formatDate = (dateString) => {
   return isNaN(date) ? "Invalid date" : dateFormatter.format(date);
 };
 
-export function Comment({ id, message, user, createdAt }) {
+export function Comment({
+  id,
+  message,
+  user,
+  createdAt,
+  likeCount,
+  likedByMe,
+}) {
   const [areChildrenHidden, setAreChildrenHidden] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
-  const { link, getReplies, createLocalComment } = useLink();
+  const [isEditing, setIsEditing] = useState(false);
+  const {
+    link,
+    getReplies,
+    createLocalComment,
+    updateLocalComment,
+    deleteLocalComment,
+    toggleLocalCommentLike,
+  } = useLink();
   const createCommentFn = useAsyncFn(createComment);
+  const updateCommentFn = useAsyncFn(updateComment);
+  const deleteCommentFn = useAsyncFn(deleteComment);
+  const toggleCommentLikeFn = useAsyncFn(toggleCommentLike);
   const childComments = getReplies(id);
 
   function onCommentReply(message) {
@@ -35,6 +58,28 @@ export function Comment({ id, message, user, createdAt }) {
       });
   }
 
+  function onCommentUpdate(message) {
+    return updateCommentFn
+      .execute({ linkId: link.id, message, id })
+      .then((comment) => {
+        setIsEditing(false);
+        //console.log(comment);
+        updateLocalComment(id, comment.message);
+      });
+  }
+
+  function onCommentDelete() {
+    return deleteCommentFn.execute({ linkId: link.id, id }).then((comment) => {
+      deleteLocalComment(comment.id);
+    });
+  }
+
+  function onToggleCommentLike() {
+    return toggleCommentLikeFn
+      .execute({ id, linkId: link.id })
+      .then(({ addLike }) => toggleLocalCommentLike(id, addLike));
+  }
+
   return (
     <>
       <div className="comment">
@@ -42,10 +87,26 @@ export function Comment({ id, message, user, createdAt }) {
           <span className="name">{user.name}</span>
           <span className="date">{formatDate(createdAt)}</span>
         </div>
-        <div className="message">{message}</div>
+        {isEditing ? (
+          <CommentForm
+            autoFocus
+            initialValue={message}
+            onSubmit={onCommentUpdate}
+            loading={updateCommentFn.loading}
+            error={updateCommentFn.error}
+          />
+        ) : (
+          <div className="message">{message}</div>
+        )}
+
         <div className="footer">
-          <IconBtn Icon={FaHeart} aria-label="Like">
-            2
+          <IconBtn
+            onClick={onToggleCommentLike}
+            disabled={toggleCommentLikeFn.loading}
+            Icon={likedByMe ? FaHeart : FaRegHeart}
+            aria-label={likedByMe ? "Unlike" : "Like"}
+          >
+            {likeCount}
           </IconBtn>
           <IconBtn
             onClick={() => setIsReplying((prev) => !prev)}
@@ -53,9 +114,23 @@ export function Comment({ id, message, user, createdAt }) {
             Icon={FaReply}
             aria-label={isReplying ? "Cancel Reply" : "Reply"}
           />
-          <IconBtn Icon={FaEdit} aria-label="Edit" />
-          <IconBtn Icon={FaTrash} aria-label="Delete" color="danger" />
+          <IconBtn
+            onClick={() => setIsEditing((prev) => !prev)}
+            isActive={isEditing}
+            Icon={FaEdit}
+            aria-label={isEditing ? "Cancel Edit" : "Edit"}
+          />
+          <IconBtn
+            disabled={deleteCommentFn.loading}
+            onClick={onCommentDelete}
+            Icon={FaTrash}
+            aria-label="Delete"
+            color="danger"
+          />
         </div>
+        {deleteCommentFn.error && (
+          <div className="error-msg mt-1">{deleteCommentFn.error}</div>
+        )}
       </div>
       {isReplying && (
         <div className="mt-1 ml-3">
