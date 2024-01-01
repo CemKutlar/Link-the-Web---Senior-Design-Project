@@ -1,6 +1,6 @@
 // Badge.js
 import React, { useState, useEffect } from "react";
-import { makeAuthRequest } from "../services/makeRequests"; // Adjust the import path as needed
+import { makeAuthRequest } from "../services/makeRequests";
 import "../styles/badge.css";
 export function Badge({ userId }) {
   const [badges, setBadges] = useState([]);

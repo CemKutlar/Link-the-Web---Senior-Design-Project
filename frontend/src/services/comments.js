@@ -1,4 +1,4 @@
-import { makeRequest, makeAuthRequest } from "./makeRequests";
+import { makeAuthRequest } from "./makeRequests";
 
 export function createComment({ linkId, message, parentId }) {
   return makeAuthRequest(`links/${linkId}/comments`, {
