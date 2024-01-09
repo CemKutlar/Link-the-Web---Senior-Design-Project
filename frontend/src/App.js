@@ -1,8 +1,5 @@
 import React from "react";
-
-// import { SearchField } from "@aws-amplify/ui-react";
 import "./styles/App.css";
-import { SearchField, components } from "@aws-amplify/ui-react";
 import "./styles/style.scss";
 import { Amplify } from "aws-amplify";
 import { Auth } from "@aws-amplify/auth";
@@ -17,15 +14,13 @@ import {
   useLocation,
 } from "react-router-dom";
 import { Linkk } from "./components/Link";
-
 import SearchComponent from "./components/SearchBar";
 import { LinkProvider } from "./contexts/LinkContext";
-
 import SearchPage from "./Search";
 import { useEffect, useState } from "react";
 import LinkPage from "./LinkPage";
 import NodePage from "./NodePage";
-import { makeRequest, makeAuthRequest } from "./services/makeRequests";
+import { makeRequest } from "./services/makeRequests";
 
 import Chat from "./Chat.js";
 import io from "socket.io-client";
@@ -122,7 +117,6 @@ export default function App() {
   const linkName = useLinkName();
 
   const [username, setUsername] = useState("");
-  const [room, setRoom] = useState("");
   const [showChat, setShowChat] = useState(false);
 
   const joinRoom = () => {
@@ -168,16 +162,6 @@ export default function App() {
   return (
     <div className="app-container">
       <SearchComponent />
-
-      {/* <div className="search-container">
-        <SearchField
-          label="Search"
-          placeholder="Search here..."
-          labelHidden={false}
-          className="search-field"
-        />
-      </div> */}
-
       <div className="nav">
         <nav>
           <ul>
