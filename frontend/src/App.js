@@ -31,7 +31,6 @@ import Chat from "./Chat.js";
 import io from "socket.io-client";
 
 import { useLinkName } from "./components/Link";
-
 Amplify.configure({
   Auth: {
     region: awsExports.REGION,

@@ -1,6 +1,6 @@
-// NodePage.js
 import React from "react";
 import { useLocation } from "react-router-dom";
+import NodeGraph from "./components/NodeGraph"; // Import your NodeGraph component
 
 const NodePage = () => {
   const location = useLocation();
@@ -11,15 +11,7 @@ const NodePage = () => {
     <div>
       <h1>Node Graph</h1>
       {linkId ? (
-        <iframe
-          title="Node Graph"
-          src={`/nodegraph.html?selectedLink=${encodeURIComponent(
-            linkId
-          )}&token=${encodeURIComponent(token)}`}
-          width="100%"
-          height="500px"
-          allowFullScreen
-        />
+        <NodeGraph selectedLinkId={linkId} token={token} />
       ) : (
         <p>Link ID not provided</p>
       )}

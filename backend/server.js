@@ -685,39 +685,6 @@ app.post("/create-link", async (req, res) => {
   }
 });
 
-app.get("/get-current-user", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res
-      .status(401)
-      .send({ error: "Authentication required", code: "UNAUTHENTICATED" });
-  }
-
-  try {
-    const userData = await verifyCognitoToken(token);
-    const userSub = userData.sub;
-
-    const client = await pool.connect();
-    try {
-      const userQuery = "SELECT id FROM users WHERE cognito_sub = $1";
-      const userResponse = await client.query(userQuery, [userSub]);
-      if (userResponse.rows.length === 0) {
-        throw new Error("User not found");
-      }
-
-      const userId = userResponse.rows[0].id;
-      res.send({ userId });
-    } finally {
-      client.release();
-    }
-  } catch (error) {
-    console.error("Error fetching user:", error.message);
-    res.status(500).send({ error: "Internal server error" });
-  }
-});
-
 async function commitToDb(promise) {
   const [error, data] = await app.to(promise);
   if (error) return app.httpErrors.internalServerError(error.message);
@@ -780,9 +747,10 @@ app.get("/related-links/:linkId", async (req, res) => {
 // Endpoint to handle edge votes
 app.post("/vote-edge", async (req, res) => {
   console.log("vote-edge girdi !!!!!");
+  console.log(req.body);
   const { link_id, related_link_id, vote_type } = req.body;
   const userId = req.userId; // Assuming you have user authentication set up
-
+  console.log("link_id in vote-edge: ", link_id);
   if (!userId) {
     return res.status(401).send({ error: "Authentication required" });
   }
@@ -835,6 +803,35 @@ app.post("/vote-edge", async (req, res) => {
     // Rollback the transaction in case of an error
     await client.query("ROLLBACK");
     console.error("Error recording vote:", error);
+    res.status(500).send({ error: "Internal server error" });
+  } finally {
+    client.release();
+  }
+});
+
+// Endpoint to get all connections for a given link
+app.get("/related-links-hover/:linkId", async (req, res) => {
+  console.log("girdiiiiiii");
+  const linkId = req.params.linkId;
+
+  const client = await pool.connect();
+  try {
+    // Query to get the description of the hovered link and related link IDs
+    const query = `
+      SELECT l.id, l.description, 
+      CASE WHEN l.id = $1 THEN 'hovered' ELSE 'related' END as link_type
+      FROM links l
+      WHERE l.id = $1 OR l.id IN (
+        SELECT related_link_id FROM related_links WHERE link_id = $1
+        UNION
+        SELECT link_id FROM related_links WHERE related_link_id = $1
+      );
+    `;
+
+    const result = await client.query(query, [linkId]);
+    res.send(result.rows);
+  } catch (error) {
+    console.error("Error fetching related links:", error);
     res.status(500).send({ error: "Internal server error" });
   } finally {
     client.release();
@@ -925,6 +922,49 @@ app.get("/get-user-badges", async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching user badges:", error.message);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+
+app.get("/get-current-user", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).send({ error: "Authentication required" });
+  }
+
+  try {
+    const decodedToken = jwt.decode(token);
+    if (!decodedToken || !decodedToken.sub) {
+      return res.status(401).send({ error: "Invalid token" });
+    }
+
+    const cognitoSub = decodedToken.sub;
+    const client = await pool.connect();
+    try {
+      const queryText =
+        "SELECT id, name, cognito_sub FROM users WHERE cognito_sub = $1";
+      const dbResponse = await client.query(queryText, [cognitoSub]);
+
+      if (dbResponse.rows.length > 0) {
+        const user = dbResponse.rows[0];
+        res.send({
+          userId: user.id,
+          name: user.name,
+          cognitoSub: user.cognito_sub,
+        });
+      } else {
+        res.status(404).send({ error: "User not found" });
+      }
+    } catch (error) {
+      console.error("Database error:", error);
+      res.status(500).send({ error: "Internal server error" });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Token decoding error:", error);
     res.status(500).send({ error: "Internal server error" });
   }
 });

@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { makeAuthRequest, makeRequest } from "./services/makeRequests";
+import "./styles/LinkCreate.css";
+import NodeGraph from "./components/NodeGraph";
 
 const LinkDetailsPage = () => {
   const location = useLocation();
+  const token = location.state?.token;
   const navigate = useNavigate();
   const initialSearchTerm = location.state?.searchTerm || "";
 
@@ -14,6 +17,13 @@ const LinkDetailsPage = () => {
   const [filteredLinks, setFilteredLinks] = useState([]);
   const [selectedLinks, setSelectedLinks] = useState(new Set());
   const [userId, setUserId] = useState(null);
+
+  const [hoveredLink, setHoveredLink] = useState(null);
+  const [highlightedLinks, setHighlightedLinks] = useState(new Set());
+  const [hoveredLinkDescription, setHoveredLinkDescription] = useState("");
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const hoverTimeoutRef = useRef(null);
 
   useEffect(() => {
     fetchAllLinks();
@@ -52,6 +62,25 @@ const LinkDetailsPage = () => {
       setFilteredLinks(response);
     } catch (error) {
       console.error("Error fetching filtered links:", error);
+    }
+  };
+  const handleLinkHover = async (linkId, event) => {
+    try {
+      const relatedLinks = await makeRequest(`/related-links-hover/${linkId}`, {
+        method: "GET",
+      });
+      const hoveredLink = relatedLinks.find((link) => link.id === linkId);
+
+      setHoveredLinkDescription(hoveredLink ? hoveredLink.description : "");
+      setHighlightedLinks(new Set(relatedLinks.map((link) => link.id)));
+
+      // Position the tooltip near the cursor
+      setPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+    } catch (error) {
+      console.error("Error fetching related links for hovered link:", error);
     }
   };
 
@@ -111,17 +140,20 @@ const LinkDetailsPage = () => {
       <h1>Create New Link</h1>
       <div>
         <label>Link Name:</label>
-        <div>{linkName}</div> {/* Display the link name as read-only */}
+        <div className="link-name">{linkName}</div>{" "}
+        {/* Display the link name as read-only */}
       </div>
       <textarea
+        className="link-description"
         value={linkDescription}
         onChange={(e) => setLinkDescription(e.target.value)}
         placeholder="Link Description"
       />
-      <div>
+      <div className="keywords-container">
         {relatedKeywords.map((keyword, index) => (
           <input
             key={index}
+            className="keyword-input"
             type="text"
             value={keyword}
             onChange={(e) => handleKeywordChange(e, index)}
@@ -129,23 +161,61 @@ const LinkDetailsPage = () => {
           />
         ))}
         {relatedKeywords.length < 10 && (
-          <button onClick={handleKeywordAdd}>Add Keyword</button>
+          <button className="add-keyword-button" onClick={handleKeywordAdd}>
+            Add Keyword
+          </button>
         )}
       </div>
-      <div>
+      <div className="related-links-container">
         <h2>Related Links</h2>
         {filteredLinks.map((link) => (
-          <div key={link.id}>
+          <div
+            key={link.id}
+            className={`related-link-item ${
+              highlightedLinks.has(link.id) ? "highlighted" : ""
+            }`}
+            onMouseEnter={(e) => {
+              if (hoverTimeoutRef.current)
+                clearTimeout(hoverTimeoutRef.current);
+              hoverTimeoutRef.current = setTimeout(
+                () => handleLinkHover(link.id, e),
+                1000
+              ); // Delay 1 second
+            }}
+            onMouseLeave={() => {
+              if (hoverTimeoutRef.current)
+                clearTimeout(hoverTimeoutRef.current);
+              hoverTimeoutRef.current = null;
+              setHoveredLinkDescription("");
+            }}
+          >
             {link.name}
             <input
+              className="related-link-checkbox"
               type="checkbox"
               checked={selectedLinks.has(link.id)}
               onChange={() => handleLinkSelection(link.id)}
             />
+            <NodeGraph selectedLinkId={link.id} token={token} />
           </div>
         ))}
       </div>
-      <button onClick={handleSubmit}>Submit</button>
+      <button className="submit-button" onClick={handleSubmit}>
+        Submit
+      </button>
+      {hoveredLinkDescription && (
+        <div
+          className="tooltip"
+          style={{
+            left: `${position.x}px`,
+            top: `${position.y * 1.5}px`,
+            position: "absolute",
+            // Additional styling...
+          }}
+        >
+          {hoveredLinkDescription}
+        </div>
+      )}
     </div>
   );
 };

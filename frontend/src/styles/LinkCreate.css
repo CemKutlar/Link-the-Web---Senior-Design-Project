@@ -1,0 +1,17 @@
+.highlighted {
+  background-color: #ffff99; /* bright yellow */
+  color: #333; /* darker text for contrast */
+}
+
+
+.tooltip {
+  position: absolute;
+  z-index: 100;  /* Ensure it is above other elements */
+  background-color: white;
+  border: 1px solid black;
+  padding: 5px;
+  /* Additional styling */
+}
+
+
+
