@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Define the network port that the container will listen on at runtime.
-EXPOSE 8080
+EXPOSE 80
 
 # Define the command that will run the app
 CMD ["node", "server.js"]

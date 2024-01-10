@@ -13,7 +13,7 @@ const LinkPage = () => {
   const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
-    const socket = io.connect(`http://localhost:3001`);
+    const socket = io.connect(process.env.REACT_APP_SERVER_URL);
     socket.emit("join_room", linkName);
     setShowChat(true);
     return () => {
@@ -37,7 +37,9 @@ const LinkPage = () => {
           <Comment key={comment.id} data={comment} />
         ))}
       </div>
-      {showChat && <Chat socket={io.connect(`http://localhost:3001`)} />}
+      {showChat && (
+        <Chat socket={io.connect(process.env.REACT_APP_SERVER_URL)} />
+      )}
     </div>
   );
 };
