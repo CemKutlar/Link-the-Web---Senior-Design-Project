@@ -34,7 +34,7 @@ Amplify.configure({
   },
 });
 
-const socket = io.connect("http://localhost:3001");
+const socket = io.connect(process.env.REACT_APP_SERVER_URL);
 
 const formFields = {
   signIn: {
@@ -235,3 +235,5 @@ export default function App() {
     </div>
   );
 }
+
+// change trigger for github: 1
