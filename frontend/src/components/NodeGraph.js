@@ -384,7 +384,7 @@ const NodeGraph = ({ selectedLinkId, token }) => {
     const fetchDataAndDrawGraph = async () => {
       try {
         const response = await fetch(
-          `http://main-lb-255210758.us-east-1.elb.amazonaws.com/backend/${selectedLinkId}`
+          `http://main-lb-255210758.us-east-1.elb.amazonaws.com/backend/related-links/${selectedLinkId}`
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
