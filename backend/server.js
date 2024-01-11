@@ -109,7 +109,7 @@ app.addHook("preHandler", async (req, res) => {
   }
 });
 
-app.post("/user/update-token", async (req, res) => {
+app.post("/backend/user/update-token", async (req, res) => {
   const { token } = req.body;
   const userInfo = getUserInfoFromToken(token);
   console.log("Line 72 = ", userInfo);
@@ -160,7 +160,7 @@ io.on("connection", (socket) => {
 });
 
 // Define a route to fetch data from your database
-app.get("/links", async (req, res) => {
+app.get("/backend/links", async (req, res) => {
   const client = await pool.connect();
   try {
     // Wrap the database query in the commitToDb function
@@ -178,7 +178,7 @@ app.get("/links", async (req, res) => {
 });
 
 // Route to check if a specific link exists
-app.get("/check-link", async (req, res) => {
+app.get("/backend/check-link", async (req, res) => {
   const linkName = req.query.link;
   if (!linkName) {
     return res.status(400).send("Link query parameter is required");
@@ -210,7 +210,7 @@ app.get("/check-link", async (req, res) => {
   }
 });
 
-app.get("/links/:id", async (request, reply) => {
+app.get("/backend/links/:id", async (request, reply) => {
   const linkId = request.params.id;
   const userId = request.userId; // Retrieved from the preHandler hook
 
@@ -270,7 +270,7 @@ app.get("/links/:id", async (request, reply) => {
   }
 });
 
-app.post("/links/:id/comments", async (req, res) => {
+app.post("/backend/links/:id/comments", async (req, res) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -349,7 +349,7 @@ app.post("/links/:id/comments", async (req, res) => {
   }
 });
 
-app.put("/links/:linkId/comments/:commentId", async (req, res) => {
+app.put("/backend/links/:linkId/comments/:commentId", async (req, res) => {
   console.log("Backend Put'a girdi");
   const { linkId, commentId } = req.params;
   const { message } = req.body;
@@ -441,7 +441,7 @@ app.put("/links/:linkId/comments/:commentId", async (req, res) => {
   }
 });
 
-app.delete("/links/:linkId/comments/:commentId", async (req, res) => {
+app.delete("/backend/links/:linkId/comments/:commentId", async (req, res) => {
   const { linkId, commentId } = req.params;
 
   const authHeader = req.headers.authorization;
@@ -498,60 +498,63 @@ app.delete("/links/:linkId/comments/:commentId", async (req, res) => {
   }
 });
 
-app.post("/links/:linkId/comments/:commentId/toggleLike", async (req, res) => {
-  const { commentId } = req.params;
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
+app.post(
+  "/backend/links/:linkId/comments/:commentId/toggleLike",
+  async (req, res) => {
+    const { commentId } = req.params;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
 
-  if (!token) {
-    return res
-      .status(401)
-      .send({ error: "Authentication required", code: "UNAUTHENTICATED" });
-  }
-
-  try {
-    const userData = await verifyCognitoToken(token);
-    const userSub = userData.sub;
-
-    const client = await pool.connect();
-    try {
-      const userQuery = "SELECT id FROM users WHERE cognito_sub = $1";
-      const userResponse = await client.query(userQuery, [userSub]);
-
-      if (userResponse.rows.length === 0) {
-        throw new Error("User not found");
-      }
-
-      const userId = userResponse.rows[0].id;
-
-      // Check if the like already exists
-      const likeQuery =
-        "SELECT 1 FROM likes WHERE user_id = $1 AND comment_id = $2";
-      const likeResponse = await client.query(likeQuery, [userId, commentId]);
-
-      if (likeResponse.rowCount === 0) {
-        // Like does not exist, so create it
-        const insertLikeQuery =
-          "INSERT INTO likes (user_id, comment_id) VALUES ($1, $2)";
-        await client.query(insertLikeQuery, [userId, commentId]);
-        res.send({ addLike: true });
-      } else {
-        // Like exists, so remove it
-        const deleteLikeQuery =
-          "DELETE FROM likes WHERE user_id = $1 AND comment_id = $2";
-        await client.query(deleteLikeQuery, [userId, commentId]);
-        res.send({ addLike: false });
-      }
-    } finally {
-      client.release();
+    if (!token) {
+      return res
+        .status(401)
+        .send({ error: "Authentication required", code: "UNAUTHENTICATED" });
     }
-  } catch (error) {
-    console.error("Error in toggle like:", error.message);
-    return res.status(500).send({ error: "Internal server error" });
-  }
-});
 
-app.post("/search-links-by-keywords", async (req, res) => {
+    try {
+      const userData = await verifyCognitoToken(token);
+      const userSub = userData.sub;
+
+      const client = await pool.connect();
+      try {
+        const userQuery = "SELECT id FROM users WHERE cognito_sub = $1";
+        const userResponse = await client.query(userQuery, [userSub]);
+
+        if (userResponse.rows.length === 0) {
+          throw new Error("User not found");
+        }
+
+        const userId = userResponse.rows[0].id;
+
+        // Check if the like already exists
+        const likeQuery =
+          "SELECT 1 FROM likes WHERE user_id = $1 AND comment_id = $2";
+        const likeResponse = await client.query(likeQuery, [userId, commentId]);
+
+        if (likeResponse.rowCount === 0) {
+          // Like does not exist, so create it
+          const insertLikeQuery =
+            "INSERT INTO likes (user_id, comment_id) VALUES ($1, $2)";
+          await client.query(insertLikeQuery, [userId, commentId]);
+          res.send({ addLike: true });
+        } else {
+          // Like exists, so remove it
+          const deleteLikeQuery =
+            "DELETE FROM likes WHERE user_id = $1 AND comment_id = $2";
+          await client.query(deleteLikeQuery, [userId, commentId]);
+          res.send({ addLike: false });
+        }
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      console.error("Error in toggle like:", error.message);
+      return res.status(500).send({ error: "Internal server error" });
+    }
+  }
+);
+
+app.post("/backend/search-links-by-keywords", async (req, res) => {
   const { keywords } = req.body;
 
   const authHeader = req.headers.authorization;
@@ -594,7 +597,7 @@ app.post("/search-links-by-keywords", async (req, res) => {
   }
 });
 
-app.post("/create-link", async (req, res) => {
+app.post("/backend/create-link", async (req, res) => {
   const { name, description, keywords, relatedLinks } = req.body;
   const badgeIdToAdd = "e3195c60-537d-4421-bfd6-49719831dd31"; // Badge ID to add
 
@@ -691,7 +694,7 @@ async function commitToDb(promise) {
   return data;
 }
 
-app.get("/related-links/:linkId", async (req, res) => {
+app.get("/backend/related-links/:linkId", async (req, res) => {
   const linkId = req.params.linkId;
 
   const client = await pool.connect();
@@ -745,7 +748,7 @@ app.get("/related-links/:linkId", async (req, res) => {
 });
 
 // Endpoint to handle edge votes
-app.post("/vote-edge", async (req, res) => {
+app.post("/backend/vote-edge", async (req, res) => {
   console.log("vote-edge girdi !!!!!");
   console.log(req.body);
   const { link_id, related_link_id, vote_type } = req.body;
@@ -810,7 +813,7 @@ app.post("/vote-edge", async (req, res) => {
 });
 
 // Endpoint to get all connections for a given link
-app.get("/related-links-hover/:linkId", async (req, res) => {
+app.get("/backend/related-links-hover/:linkId", async (req, res) => {
   console.log("girdiiiiiii");
   const linkId = req.params.linkId;
 
@@ -838,7 +841,7 @@ app.get("/related-links-hover/:linkId", async (req, res) => {
   }
 });
 
-app.get("/edge-vote-counts", async (req, res) => {
+app.get("/backend/edge-vote-counts", async (req, res) => {
   console.log("edge-cote-count q girdi");
   const { linkId, relatedLinkId } = req.query;
 
@@ -878,7 +881,7 @@ app.get("/edge-vote-counts", async (req, res) => {
   }
 });
 
-app.get("/get-user-badges", async (req, res) => {
+app.get("/backend/get-user-badges", async (req, res) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -926,7 +929,7 @@ app.get("/get-user-badges", async (req, res) => {
   }
 });
 
-app.get("/get-current-user", async (req, res) => {
+app.get("/backend/get-current-user", async (req, res) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -974,7 +977,7 @@ app.get("/backend/health", (req, res) => {
   res.status(200).send("OK");
 });
 
-app.get("/cem", (req, res) => {
+app.get("/backend/cem", (req, res) => {
   console.log("Health check happening!");
   res.send({ name: "GeeksforGeeks" });
 });
