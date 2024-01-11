@@ -968,6 +968,11 @@ app.get("/get-current-user", async (req, res) => {
     res.status(500).send({ error: "Internal server error" });
   }
 });
+// Health check endpoint
+app.get("/backend/health", (req, res) => {
+  console.log("Health check happening!");
+  res.status(200).send("OK");
+});
 
 app.listen({ port: process.env.PORT }, (err) => {
   if (err) {
