@@ -1,7 +1,8 @@
 import axios from "axios";
 import { Auth } from "@aws-amplify/auth";
 
-// /backend added to the env variable in secrets.
+console.log(process.env.REACT_APP_SERVER_URL);
+// backend added to the env variable in secrets.
 const api = axios.create({
   baseURL: `https://${process.env.REACT_APP_SERVER_URL}/backend`,
   withCredentials: true,
