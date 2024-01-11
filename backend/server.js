@@ -974,13 +974,20 @@ app.get("/backend/health", (req, res) => {
   res.status(200).send("OK");
 });
 
-app.listen({ port: process.env.PORT }, (err) => {
+app.get("/cem", (req, res) => {
+  console.log("Health check happening!");
+  res.send({ name: "GeeksforGeeks" });
+});
+
+app.listen({ port: process.env.PORT, host: "0.0.0.0" }, (err) => {
+  console.log("PORT in server:", process.env.PORT);
   if (err) {
     console.error(err);
     process.exit(1);
   }
 });
 server.listen(3001, () => {
+  console.log("PORT in server 2:", process.env.PORT);
   console.log("SERVER RUNNING");
 });
 

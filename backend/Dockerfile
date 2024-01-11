@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as the base image
-FROM node:18
+FROM node:18-alpine
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Define the network port that the container will listen on at runtime.
-EXPOSE 80
+EXPOSE 3002
 
 # Define the command that will run the app
 CMD ["node", "server.js"]
