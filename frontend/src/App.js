@@ -209,17 +209,24 @@ export default function App() {
         <div className="how-to-use-section">
           <h2>How to Use</h2>
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas
-            convallis ac enim vel venenatis. Vestibulum non nisl in arcu
-            ultrices congue sit amet vel turpis. Proin congue consequat
-            malesuada. Sed accumsan iaculis nisi luctus elementum. Ut aliquet
-            tortor ut convallis mollis. Vivamus volutpat, lacus non placerat
-            elementum, enim enim lobortis nibh, a molestie lectus erat at urna.
-            Pellentesque tempor pharetra quam, vel varius augue efficitur ac.
-            Aenean pulvinar pellentesque neque, ut viverra ante lacinia et. Cras
-            commodo erat vel tempor ullamcorper. Cras eget feugiat tortor, quis
-            condimentum odio. Aenean pretium magna erat, non mattis odio
-            vulputate at. Aliquam pretium gravida interdum.
+            You can search whatever link you want in the search bar. If it
+            exists in our database you will be redirected to the linkpage of the
+            link. Here you can discuss the link with other users. You can
+            comment, reply, edit and like in this page. Also there is a chatroom
+            under the comment section. You can join the room and chat with other
+            online people about that specific link. Also if you want to see the
+            related links, you can click the nodegraph button and you wil see
+            the node graph that shows the related links of your searched link.
+            You can check other links description by hovering the node and gain
+            an insight about them as well. If you like or dislike the
+            connections, you can click the edges and vote as you wish. We will
+            take care of the unwanted connections if the connection gets too
+            much dislikes. You can also right click to 2 nodes and see the
+            shortest path between them. If the searched link doesnt exist in our
+            database you can create the linkpage. Just write a link description
+            and add keywords as much as possible. So other users can relate the
+            links easliy. That is prety much all you should know. Now time to
+            explore LTW!
           </p>
         </div>
       )}
